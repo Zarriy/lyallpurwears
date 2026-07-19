@@ -1,0 +1,74 @@
+/* ============================================================
+   LYALLPURWEARS — Design Tokens
+   Heritage lawn store · Lyallpur (Faisalabad), Pakistan
+   Derived from the Noor & Co design prototype (classic theme).
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Nastaliq+Urdu:wght@400;500&display=swap');
+
+:root {
+  /* ---- Color · core palette ---- */
+  --ink: #0A0A0A;
+  --ink-soft: #1A1A1A;
+  --paper: #FAFAF7;
+  --paper-warm: #F4F1EA;
+  --gold: #B8924A;
+  --gold-soft: #D4B876;
+  --gold-deep: #8B6F2E;
+  --line: rgba(10, 10, 10, 0.12);
+  --line-soft: rgba(10, 10, 10, 0.06);
+  --muted: #6B6B6B;
+
+  /* ---- Color · on-dark (footer, ink sections) ---- */
+  --paper-fade-70: rgba(250, 250, 247, 0.7);
+  --paper-fade-60: rgba(250, 250, 247, 0.6);
+  --paper-fade-40: rgba(250, 250, 247, 0.4);
+  --line-on-ink: rgba(250, 250, 247, 0.12);
+  --gold-tint: rgba(184, 146, 74, 0.08);
+  --gold-line: rgba(184, 146, 74, 0.3);
+
+  /* ---- Typography ---- */
+  --serif: 'Cormorant Garamond', 'Times New Roman', serif;
+  --sans: 'Inter', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --urdu: 'Noto Nastaliq Urdu', serif;
+
+  --text-xs: 10px;
+  --text-sm: 11px;
+  --text-base: 15px;
+  --text-md: 17px;
+  --text-lg: 20px;
+  --text-xl: 26px;
+  --display-sm: clamp(32px, 3.5vw, 48px);
+  --display-md: clamp(40px, 4.5vw, 64px);
+  --display-lg: clamp(48px, 5.5vw, 80px);
+  --display-xl: clamp(64px, 8.5vw, 124px);
+
+  --track-kicker: 0.18em;
+  --track-wide: 0.16em;
+
+  /* ---- Spacing ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+  --space-10: 120px;
+
+  --gutter: clamp(20px, 4vw, 56px);
+  --section-pad: clamp(64px, 9vw, 120px);
+
+  /* ---- Motion ---- */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 0.3s;
+  --dur-med: 0.5s;
+  --dur-slow: 0.9s;
+
+  /* ---- Elevation / chrome ---- */
+  --z-header: 50;
+  --z-drawer: 90;
+  --z-veil: 100;
+}

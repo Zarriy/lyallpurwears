@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Noor & Co — Storefront · Print</title>
+<link rel="stylesheet" href="styles.css" />
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: #2a2a2a; }
+  #root { min-height: 100vh; }
+
+  /* Print page — each .pp is one printed sheet */
+  .pp {
+    width: 1440px;
+    background: var(--paper);
+    color: var(--ink);
+    margin: 0 auto 24px;
+    overflow: hidden;
+    page-break-after: always;
+    break-after: page;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .pp-header {
+    padding: 24px 56px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .pp-header .num { color: var(--gold-soft); }
+  /* Disable any sticky positioning for print */
+  .pp [style*="sticky"], .pp [style*="position: sticky"], .pp [style*="position:sticky"] {
+    position: relative !important;
+    top: auto !important;
+  }
+  /* Disable animations / transitions in print */
+  .pp *, .pp *::before, .pp *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  /* Keep reveal items visible */
+  .pp .reveal, .pp .reveal-stagger,
+  .pp .reveal > *, .pp .reveal-stagger > * {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  /* Marquee static for print */
+  .pp .marquee-track {
+    animation: none !important;
+  }
+
+  @media print {
+    @page {
+      size: 1440px auto;
+      margin: 0;
+    }
+    html, body {
+      background: #fff !important;
+    }
+    body {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .pp {
+      margin: 0 !important;
+      box-shadow: none !important;
+      page-break-after: always;
+      break-after: page;
+    }
+    .pp:last-child {
+      page-break-after: auto;
+    }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<template id="__bundler_thumbnail" data-bg-color="#FAFAF7">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#FAFAF7"/>
+    <text x="600" y="380" text-anchor="middle" font-family="Cormorant Garamond, Times New Roman, serif" font-size="160" fill="#0A0A0A" font-weight="500" letter-spacing="4">NOOR</text>
+    <text x="600" y="430" text-anchor="middle" font-family="Cormorant Garamond, serif" font-size="60" fill="#B8924A" font-style="italic">&amp;</text>
+    <text x="600" y="500" text-anchor="middle" font-family="Cormorant Garamond, Times New Roman, serif" font-size="160" fill="#0A0A0A" font-weight="500" letter-spacing="6">CO</text>
+    <line x1="540" y1="560" x2="660" y2="560" stroke="#B8924A" stroke-width="2"/>
+    <text x="600" y="600" text-anchor="middle" font-family="monospace" font-size="18" fill="#6B6B6B" letter-spacing="6">STOREFRONT · PRINT VIEW</text>
+  </svg>
+</template>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="imagery.jsx"></script>
+<script type="text/babel" src="primitives.jsx"></script>
+<script type="text/babel" src="homepage.jsx"></script>
+<script type="text/babel" src="pdp.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+function PrintPage({ idx, total, title, theme, children }) {
+  return (
+    <div className={`pp theme-${theme || 'classic'}`}>
+      <div className="pp-header">
+        <span>Noor &amp; Co · Storefront Design</span>
+        <span>{title}</span>
+        <span className="num">{String(idx).padStart(2, '0')} / {String(total).padStart(2, '0')}</span>
+      </div>
+      <div style={{ background: 'var(--paper)' }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function PrintCardSheet({ theme = 'classic' }) {
+  return (
+    <div style={{ background: 'var(--paper-warm)', padding: '64px 56px' }}>
+      <div style={{ marginBottom: 48 }}>
+        <div className="kicker kicker-gold" style={{ marginBottom: 12 }}>Component · Product Card</div>
+        <h2 className="serif-display" style={{ fontSize: 56 }}>
+          Three card <em style={{ color: 'var(--gold)', fontWeight: 300 }}>directions.</em>
+        </h2>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }}>
+        <div>
+          <div className="kicker" style={{ marginBottom: 16 }}>01 · Editorial</div>
+          <ProductCard product={{ id: 1, name: 'Gulab', urdu: 'گلاب', price: '8,490', stock: 3, badge: 'New', fabric: '3 Piece Lawn' }} variant="editorial" />
+        </div>
+        <div>
+          <div className="kicker" style={{ marginBottom: 16 }}>02 · Minimal</div>
+          <ProductCard product={{ id: 2, name: 'Mehrunissa', price: '9,290', oldPrice: '11,500', stock: 3, discount: 19, fabric: '3 Piece Lawn' }} variant="minimal" />
+        </div>
+        <div>
+          <div className="kicker" style={{ marginBottom: 16 }}>03 · Bordered</div>
+          <ProductCard product={{ id: 3, name: 'Roshni', price: '6,790', oldPrice: '8,500', stock: 2, discount: 20, fabric: '2 Piece Lawn' }} variant="card" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const PAGES = [
+  { title: 'Homepage · Classic', theme: 'classic', node: <HomePage cardVariant="editorial" /> },
+  { title: 'Homepage · Noir', theme: 'noir', node: <HomePage cardVariant="editorial" /> },
+  { title: 'Homepage · Rose & Wine', theme: 'rose', node: <HomePage cardVariant="editorial" /> },
+  { title: 'Homepage · Emerald Heritage', theme: 'emerald', node: <HomePage cardVariant="editorial" /> },
+  { title: 'Product Card Variations', theme: 'classic', node: <PrintCardSheet /> },
+  { title: 'PDP · Editorial Layout', theme: 'classic', node: <PDPPage layout="editorial" /> },
+  { title: 'PDP · Split Layout', theme: 'classic', node: <PDPPage layout="split" /> },
+  { title: 'PDP · Immersive Layout', theme: 'classic', node: <PDPPage layout="immersive" /> },
+];
+
+function App() {
+  return (
+    <div>
+      {PAGES.map((p, i) => (
+        <PrintPage key={i} idx={i + 1} total={PAGES.length} title={p.title} theme={p.theme}>
+          {p.node}
+        </PrintPage>
+      ))}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+
+// Auto-print after fonts + layout settle (disabled when bundled / inlined)
+(async () => {
+  if (window.location.protocol === 'blob:' || window.__bundled) return;
+  try {
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+  } catch(e) {}
+  await new Promise(r => setTimeout(r, 1500));
+  window.print();
+})();
+</script>
+</body>
+</html>
