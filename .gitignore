@@ -1,0 +1,17 @@
+node_modules
+dist
+dist-ssr
+*.local
+
+# Sanity / env secrets — never commit a write token or project id you don't want public.
+.env
+.env.local
+.env.*.local
+
+# Editor / OS cruft
+.DS_Store
+*.log
+npm-debug.log*
+
+# Sanity CLI local state (created by `sanity init` / `sanity dev`)
+.sanity

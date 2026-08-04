@@ -1,4 +1,4 @@
-// Lyallpurwears logo — the mark is drawn from Lyallpur's (old Faisalabad's)
+// Lyallpur Wear logo — the mark is drawn from Lyallpur's (old Faisalabad's)
 // Ghanta Ghar plan: eight bazaars radiating from the clock tower.
 
 export function LogoMark({ size = 40, color = 'currentColor', accent = 'var(--gold)' }) {
@@ -36,7 +36,7 @@ export function Logo({ height = 40, color = 'currentColor', accent = 'var(--gold
       viewBox="0 0 268 48"
       fill="none"
       role="img"
-      aria-label="Lyallpurwears"
+      aria-label="Lyallpur Wear"
       style={{ display: 'block' }}
     >
       <g transform="translate(0, 0)">
@@ -68,10 +68,10 @@ export function Logo({ height = 40, color = 'currentColor', accent = 'var(--gold
         y="43"
         fontFamily="'JetBrains Mono', monospace"
         fontSize="10"
-        letterSpacing="7.5"
+        letterSpacing="12"
         fill={accent}
       >
-        W E A R S
+        W E A R
       </text>
     </svg>
   );
@@ -85,7 +85,7 @@ export function LogoStacked({ width = 180, color = 'currentColor', accent = 'var
       viewBox="0 0 200 118"
       fill="none"
       role="img"
-      aria-label="Lyallpurwears"
+      aria-label="Lyallpur Wear"
       style={{ display: 'block' }}
     >
       <g transform="translate(76, 0)">
@@ -115,15 +115,15 @@ export function LogoStacked({ width = 180, color = 'currentColor', accent = 'var
       </text>
       <line x1="55" y1="96" x2="145" y2="96" stroke={accent} strokeWidth="1" opacity="0.6" />
       <text
-        x="103"
+        x="107.1"
         y="112"
         textAnchor="middle"
         fontFamily="'JetBrains Mono', monospace"
         fontSize="11"
-        letterSpacing="9"
+        letterSpacing="14.2"
         fill={accent}
       >
-        W E A R S
+        W E A R
       </text>
     </svg>
   );

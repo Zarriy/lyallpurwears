@@ -1,6 +1,24 @@
 // Contact — WhatsApp-first support, studio address, and FAQ.
+//
+// Every contact detail comes from Site Settings in Studio. The literals below
+// are last-resort fallbacks only, so the page still reads as finished before
+// the CMS is reachable or populated — the same pattern the PDP uses.
 import { useState } from 'react';
-import { Reveal, Placeholder, TrustStrip } from '../components/primitives.jsx';
+import { Link } from 'react-router-dom';
+import { Reveal, TrustStrip, Accordion } from '../components/primitives.jsx';
+import { useStore } from '../sanity/useStore.js';
+
+const DEFAULT_PHONE = '+92 300 1234567';
+const DEFAULT_EMAIL = 'hello@lyallpurwear.pk';
+const DEFAULT_ADDRESS = 'D Ground, Faisalabad (Lyallpur), Pakistan';
+const DEFAULT_ADDRESS_NOTE = 'Visits by appointment only';
+const DEFAULT_HOURS = ['Mon–Sat · 10am–7pm PKT', 'Sun · WhatsApp only'];
+
+// wa.me wants bare digits — no +, spaces or dashes.
+function waLink(phone) {
+  const digits = String(phone || '').replace(/\D/g, '');
+  return digits ? `https://wa.me/${digits}` : null;
+}
 
 function Hero() {
   return (
@@ -95,62 +113,103 @@ function ContactForm() {
   );
 }
 
+function Card({ icon, label, children }) {
+  return (
+    <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
+      <div style={{ width: 40, height: 40, border: '1px solid var(--line)', flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+        {icon}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="kicker kicker-gold" style={{ marginBottom: 6 }}>{label}</div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+const detailLink = { color: 'var(--ink)', borderBottom: '1px solid var(--line)', transition: 'border-color 0.3s var(--ease)' };
+
 function ContactCards() {
+  const { settings } = useStore();
+  const phone = settings?.contactPhone || DEFAULT_PHONE;
+  const email = settings?.contactEmail || DEFAULT_EMAIL;
+  const address = settings?.contactAddress || DEFAULT_ADDRESS;
+  const addressNote = settings?.contactAddressNote || DEFAULT_ADDRESS_NOTE;
+  const hours = settings?.contactHours?.length ? settings.contactHours : DEFAULT_HOURS;
+  const whatsapp = waLink(phone);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
-      <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
-        <div style={{ width: 40, height: 40, border: '1px solid var(--line)', flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Card
+        label="WhatsApp"
+        icon={
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" />
           </svg>
+        }
+      >
+        <div style={{ fontFamily: 'var(--mono)', fontSize: 18, marginBottom: 4 }}>
+          {whatsapp ? (
+            <a href={whatsapp} target="_blank" rel="noopener noreferrer" style={detailLink}>{phone}</a>
+          ) : (
+            phone
+          )}
         </div>
-        <div>
-          <div className="kicker kicker-gold" style={{ marginBottom: 6 }}>WhatsApp</div>
-          <div style={{ fontFamily: 'var(--mono)', fontSize: 18, color: 'var(--ink)', marginBottom: 4 }}>+92 300 1234567</div>
-          <div style={{ fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--muted)' }}>Fastest — 9am–9pm PKT</div>
-        </div>
-      </div>
+        <div style={{ fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--muted)' }}>Fastest — we reply the same day</div>
+      </Card>
 
-      <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
-        <div style={{ width: 40, height: 40, border: '1px solid var(--line)', flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Card
+        label="Email"
+        icon={
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path d="M4 4h16v16H4z" /><path d="M4 6l8 7 8-7" />
           </svg>
+        }
+      >
+        <div style={{ fontFamily: 'var(--mono)', fontSize: 18, marginBottom: 4, overflowWrap: 'anywhere' }}>
+          <a href={`mailto:${email}`} style={detailLink}>{email}</a>
         </div>
-        <div>
-          <div className="kicker kicker-gold" style={{ marginBottom: 6 }}>Email</div>
-          <div style={{ fontFamily: 'var(--mono)', fontSize: 18, color: 'var(--ink)', marginBottom: 4 }}>hello@lyallpurwears.pk</div>
-          <div style={{ fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--muted)' }}>For press, wholesale and everything else</div>
-        </div>
-      </div>
+        <div style={{ fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--muted)' }}>For press, wholesale and everything else</div>
+      </Card>
 
-      <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
-        <div style={{ width: 40, height: 40, border: '1px solid var(--line)', flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Card
+        label="Studio"
+        icon={
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path d="M12 21s7-6.5 7-12a7 7 0 10-14 0c0 5.5 7 12 7 12z" /><circle cx="12" cy="9" r="2.4" />
           </svg>
+        }
+      >
+        {/* The address is a text field, so honour the line breaks the editor
+            typed rather than collapsing them into a run-on line. */}
+        <div style={{ fontFamily: 'var(--serif)', fontSize: 18, marginBottom: 4, whiteSpace: 'pre-line', lineHeight: 1.5 }}>
+          {address}
         </div>
-        <div style={{ flex: 1 }}>
-          <div className="kicker kicker-gold" style={{ marginBottom: 6 }}>Studio</div>
-          <div style={{ fontFamily: 'var(--serif)', fontSize: 18, color: 'var(--ink)', marginBottom: 4 }}>
-            D Ground, Faisalabad (Lyallpur), Pakistan
-          </div>
-          <div style={{ fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--muted)', marginBottom: 16 }}>
-            Visits by appointment only
-          </div>
-          <Placeholder ratio="4/3" kind="texture" label="MAP · D GROUND · LYALLPUR" />
-        </div>
-      </div>
+        {addressNote && (
+          <div style={{ fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--muted)' }}>{addressNote}</div>
+        )}
+      </Card>
 
-      <div style={{ borderTop: '1px solid var(--line)', paddingTop: 20 }}>
-        <div className="kicker kicker-gold" style={{ marginBottom: 10 }}>Hours</div>
-        <div style={{ fontFamily: 'var(--mono)', fontSize: 13, letterSpacing: '0.08em', color: 'var(--ink)', marginBottom: 4 }}>
-          MON–SAT · 10AM–7PM PKT
+      {hours.length > 0 && (
+        <div style={{ borderTop: '1px solid var(--line)', paddingTop: 20 }}>
+          <div className="kicker kicker-gold" style={{ marginBottom: 10 }}>Hours</div>
+          {hours.map((line, i) => (
+            <div
+              key={line}
+              style={{
+                fontFamily: 'var(--mono)',
+                fontSize: 13,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: i === 0 ? 'var(--ink)' : 'var(--muted)',
+                marginBottom: 4,
+              }}
+            >
+              {line}
+            </div>
+          ))}
         </div>
-        <div style={{ fontFamily: 'var(--mono)', fontSize: 13, letterSpacing: '0.08em', color: 'var(--muted)' }}>
-          SUN · WHATSAPP ONLY
-        </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -167,30 +226,6 @@ function ContactSplit() {
         </Reveal>
       </div>
     </section>
-  );
-}
-
-function Accordion({ items }) {
-  const [open, setOpen] = useState(0);
-  return (
-    <div style={{ borderTop: '1px solid var(--line)' }}>
-      {items.map((it, i) => (
-        <div key={i} style={{ borderBottom: '1px solid var(--line)' }}>
-          <button
-            onClick={() => setOpen(open === i ? -1 : i)}
-            style={{ width: '100%', textAlign: 'left', padding: '24px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-          >
-            <span style={{ fontFamily: 'var(--serif)', fontSize: 20 }}>{it.title}</span>
-            <span style={{ fontFamily: 'var(--mono)', fontSize: 16, color: 'var(--gold)' }}>{open === i ? '−' : '+'}</span>
-          </button>
-          {open === i && (
-            <div style={{ paddingBottom: 28, fontFamily: 'var(--sans)', fontSize: 15, lineHeight: 1.7, color: 'var(--muted)', maxWidth: 640 }}>
-              {it.body}
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
   );
 }
 
@@ -215,6 +250,14 @@ function FAQ() {
       <Reveal>
         <div style={{ maxWidth: 780, margin: '0 auto' }}>
           <Accordion items={items} />
+          <div style={{ marginTop: 40, textAlign: 'center' }}>
+            <Link
+              to="/faq"
+              style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', borderBottom: '1px solid var(--ink)', paddingBottom: 4 }}
+            >
+              Read all questions →
+            </Link>
+          </div>
         </div>
       </Reveal>
     </section>

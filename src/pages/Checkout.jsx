@@ -4,7 +4,7 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext.jsx';
-import { Placeholder } from '../components/primitives.jsx';
+import { SanityImage } from '../components/SanityImage.jsx';
 
 const BLUE = '#0D66F2';
 const TAX_RATE = 0.16;
@@ -47,11 +47,13 @@ function QuestionIcon() {
 function Summary({ items, subtotal, shipping, taxes, total }) {
   return (
     <>
-      {items.map((l) => (
+      {items.map((l) => {
+        const front = l.product.images?.find((i) => i.view === 'FRONT') || l.product.images?.[0] || null;
+        return (
         <div key={l.key} style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
           <div style={{ position: 'relative', flexShrink: 0 }}>
             <div style={{ width: 64, height: 64, borderRadius: 8, border: '1px solid #DEDEDE', overflow: 'hidden', background: '#fff' }}>
-              <Placeholder ratio="1/1" seed={l.product.name} kind="model" />
+              <SanityImage asset={front?.asset} alt={front?.alt || l.product.name} ratio="1/1" seed={l.product.name} kind="model" />
             </div>
             <span style={{
               position: 'absolute', top: -8, right: -8,
@@ -71,7 +73,8 @@ function Summary({ items, subtotal, shipping, taxes, total }) {
           </div>
           <div style={{ fontSize: 14, color: '#1A1A1A' }}>{fmt(l.product.price * l.qty)}</div>
         </div>
-      ))}
+        );
+      })}
 
       <div style={{ display: 'flex', gap: 12, margin: '6px 0 22px' }}>
         <input className="chk-input" placeholder="Gift card" style={{ flex: 1 }} />
@@ -166,7 +169,7 @@ export default function Checkout() {
       <header className="chk-header">
         <div className="chk-header-inner">
           <Link to="/" style={{ fontWeight: 700, fontSize: 20, color: '#1A1A1A', letterSpacing: '-0.01em' }}>
-            Lyallpurwears
+            Lyallpur Wear
           </Link>
           <Link to="/cart" aria-label="Back to bag" style={{ color: BLUE }}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -205,7 +208,7 @@ export default function Checkout() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 28, gap: 16, flexWrap: 'wrap' }}>
             <div style={{ fontSize: 14, color: '#545454' }}>
-              Need help? <a href="#" style={{ color: BLUE, textDecoration: 'underline' }}>Contact us</a>
+              Need help? <Link to="/contact" style={{ color: BLUE, textDecoration: 'underline' }}>Contact us</Link>
             </div>
             <button className="chk-pay" style={{ width: 'auto', padding: '15px 28px' }} onClick={() => navigate('/collections')}>
               Continue shopping
@@ -360,8 +363,8 @@ export default function Checkout() {
           </button>
 
           <div style={{ borderTop: '1px solid #ECECEC', marginTop: 30, paddingTop: 16, display: 'flex', gap: 18 }}>
-            <a href="#" style={{ color: BLUE, fontSize: 13, textDecoration: 'underline' }}>Privacy policy</a>
-            <a href="#" style={{ color: BLUE, fontSize: 13, textDecoration: 'underline' }}>Cancellations</a>
+            <Link to="/privacy" style={{ color: BLUE, fontSize: 13, textDecoration: 'underline' }}>Privacy policy</Link>
+            <Link to="/shipping-returns" style={{ color: BLUE, fontSize: 13, textDecoration: 'underline' }}>Cancellations</Link>
           </div>
         </form>
       </div>

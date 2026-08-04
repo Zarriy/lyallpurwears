@@ -1,5 +1,5 @@
 /* ============================================================
-   LYALLPURWEARS — Design Tokens
+   LYALLPUR WEAR — Design Tokens
    Heritage lawn store · Lyallpur (Faisalabad), Pakistan
    Derived from the Noor & Co design prototype (classic theme).
    ============================================================ */
@@ -67,8 +67,14 @@
   --dur-med: 0.5s;
   --dur-slow: 0.9s;
 
+  /* Capped height of the PDP gallery's main stage — the slide's own 3/4
+     ratio is overridden by this, so the image never outgrows the fold. */
+  --pdp-stage-h: clamp(360px, 54vh, 580px);
+
   /* ---- Elevation / chrome ---- */
   --z-header: 50;
+  --z-search: 70;
   --z-drawer: 90;
+  --z-lightbox: 95;
   --z-veil: 100;
 }

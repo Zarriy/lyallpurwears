@@ -1,18 +1,24 @@
 {
-  "name": "lyallpurwears",
+  "name": "lyallpurwear",
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "seed": "node scripts/seed.mjs"
   },
   "dependencies": {
+    "@sanity/client": "^7.26.0",
+    "@sanity/image-url": "^2.1.1",
+    "@sanity/vision": "^4.22.0",
     "framer-motion": "^11.15.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.28.0"
+    "react-router-dom": "^6.28.0",
+    "sanity": "^4.22.0",
+    "styled-components": "^6.4.4"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",

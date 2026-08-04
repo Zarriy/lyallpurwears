@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Placeholder } from './primitives.jsx';
+import { SanityImage } from './SanityImage.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import { formatPrice } from '../data/products.js';
 
@@ -13,17 +13,18 @@ function LineItem({ line, setQty, removeItem }) {
   const meta = [product.fabric, [size, color].filter(Boolean).join(' · ')]
     .filter(Boolean)
     .join(' · ');
+  const front = product.images?.find((i) => i.view === 'FRONT') || product.images?.[0] || null;
   return (
     <div style={{ display: 'flex', gap: 14, paddingBottom: 20, borderBottom: '1px solid var(--line)' }}>
       <Link to={`/product/${product.slug}`} style={{ flexShrink: 0, width: 72 }}>
-        <Placeholder ratio="3/4" seed={product.name} label={product.name.toUpperCase()} />
+        <SanityImage asset={front?.asset} alt={front?.alt || product.name} ratio="3/4" seed={product.name} label={product.name.toUpperCase()} />
       </Link>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'flex-start' }}>
           <div style={{ fontFamily: 'var(--serif)', fontSize: 18, lineHeight: 1.2 }}>
             {product.name}
             {product.urdu && (
-              <span className="urdu" style={{ fontSize: 12, color: 'var(--gold)', marginLeft: 6 }}>{product.urdu}</span>
+              <span className="urdu" lang="ur" style={{ fontSize: 13, color: 'var(--gold)', marginLeft: 6 }}>{product.urdu}</span>
             )}
           </div>
           <button
@@ -155,7 +156,7 @@ export function CartDrawer() {
                   textAlign: 'center',
                 }}
               >
-                <div className="kicker kicker-gold">Lyallpurwears</div>
+                <div className="kicker kicker-gold">Lyallpur Wear</div>
                 <div style={{ fontFamily: 'var(--serif)', fontSize: 30 }}>Your bag is empty.</div>
                 <p style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 16, color: 'var(--muted)' }}>
                   Hand-loomed lawn, block-printed and waiting.
@@ -217,19 +218,9 @@ export function CartDrawer() {
                   <div className="kicker kicker-gold" style={{ textAlign: 'center' }}>
                     Cash on Delivery available · PKR
                   </div>
-                  <div style={{ display: 'flex', gap: 10 }}>
-                    <Link to="/cart" className="btn btn-outline" style={{ flex: 1 }} onClick={closeDrawer}>
-                      View Bag
-                    </Link>
-                    <Link
-                      to="/checkout"
-                      className="btn btn-gold"
-                      style={{ flex: 1 }}
-                      onClick={closeDrawer}
-                    >
-                      Checkout
-                    </Link>
-                  </div>
+                  <Link to="/checkout" className="btn btn-gold" onClick={closeDrawer}>
+                    Checkout
+                  </Link>
                 </div>
               </>
             )}

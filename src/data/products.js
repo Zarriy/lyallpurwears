@@ -1,4 +1,4 @@
-// Catalogue — Lyallpurwears. Prices in PKR.
+// Catalogue — Lyallpur Wear. Prices in PKR.
 
 export const CATEGORIES = [
   { slug: 'lawn', en: 'Lawn', ur: 'لان', tag: 'Featherweight cotton' },

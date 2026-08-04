@@ -1,25 +1,62 @@
 /* ============================================================
-   LYALLPURWEARS — Global styles
+   LYALLPUR WEAR — Global styles
    ============================================================ */
 @import './tokens.css';
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* Resets below are scoped away from the mounted Sanity Studio (/studio).
+   Studio ships its own complete CSS reset and renders straight into this
+   document (no iframe), so unscoped global element selectors like `button`,
+   `img`, `input` would otherwise cascade into Sanity UI's components and
+   fight its styling. StudioPage.jsx toggles the `.studio-route` class on
+   <body> while mounted.
+
+   The scope MUST stay wrapped in `:where()` — it contributes zero
+   specificity, so these rules keep the same weight as the bare `*` /
+   `button` / `a` selectors they replaced. Without it, `body:not(...) *`
+   scores (0,1,1) and beats every class selector below it, wiping the
+   padding/margin off `.btn`, `.badge`, `.marquee-track` and friends. */
+:where(body:not(.studio-route)) * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
+  font-size: var(--text-base);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+:where(body:not(.studio-route)) {
   font-family: var(--sans);
   color: var(--ink);
   background: var(--paper);
-  -webkit-font-smoothing: antialiased;
-  font-size: var(--text-base);
-  line-height: 1.5;
 }
 
-button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
-a { color: inherit; text-decoration: none; cursor: pointer; }
-img, svg { display: block; max-width: 100%; }
-input, textarea, select { font: inherit; }
+:where(body:not(.studio-route)) button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+:where(body:not(.studio-route)) a { color: inherit; text-decoration: none; cursor: pointer; }
+:where(body:not(.studio-route)) img, :where(body:not(.studio-route)) svg { display: block; max-width: 100%; }
+:where(body:not(.studio-route)) input, :where(body:not(.studio-route)) textarea, :where(body:not(.studio-route)) select { font: inherit; }
 
-::selection { background: var(--gold); color: var(--paper); }
+:where(body:not(.studio-route)) ::selection { background: var(--gold); color: var(--paper); }
+
+/* ---- Sanity Studio route ----
+   Studio mounts straight into this document and sizes its shell — nav bar,
+   document list, editor pane — against a definite height, so every ancestor
+   from <html> down to #root has to carry one or the whole app collapses to
+   the height of its own content and the panes lose their scrolling.
+
+   The margin/padding reset above is deliberately scoped away from this route
+   (it would cascade into Sanity UI and fight its styling), which is why the
+   body's default 8px margin is cleared here explicitly rather than inherited
+   from it — that margin is what was insetting Studio from the window edges.
+
+   `overflow: hidden` because Studio scrolls its panes internally; without it
+   the document scrolls as well and you get two nested scrollbars. */
+html.studio-route,
+html.studio-route body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+html.studio-route #root { height: 100%; }
 
 /* ---- Type utilities ---- */
 .kicker {
@@ -30,7 +67,38 @@ input, textarea, select { font: inherit; }
   color: var(--muted);
 }
 .kicker-gold { color: var(--gold); }
-.urdu { font-family: var(--urdu); font-weight: 400; }
+/* Nastaliq is calligraphic, cursive and deeply sloped, so it has to opt out
+   of the Latin display treatment applied around it:
+     - font-style/weight are pinned — Noto Nastaliq Urdu ships no italic and
+       no 300, and the browser's synthetic oblique/thinning of a joined
+       script is what makes it look broken.
+     - letter-spacing must be 0 — tracking a cursive script pulls the glyphs
+       apart at the joins.
+     - the leading is generous because the script's ink runs far above and
+       below its em box; `.serif-display`'s 0.95 line-height would otherwise
+       collide it with the line beneath.
+   `unicode-bidi: isolate` keeps the RTL run from reordering the Latin text
+   it sits beside. Every use of this class is an Urdu run set inline next to
+   a Latin one, so it is an inline-block on its own baseline — that keeps its
+   leading out of the surrounding line box. */
+.urdu {
+  font-family: var(--urdu);
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: normal;
+  display: inline-block;
+  line-height: 1.35;
+  vertical-align: 0.03em;
+  direction: rtl;
+  unicode-bidi: isolate;
+}
+/* Nastaliq set beside a Latin display heading — its body height reads much
+   smaller per em than Cormorant's, so it is scaled and nudged to sit level
+   with the Latin instead of towering over it. */
+.serif-display .urdu {
+  font-size: 0.52em;
+  margin-inline-start: 0.12em;
+}
 .serif-display {
   font-family: var(--serif);
   font-weight: 400;
@@ -208,6 +276,14 @@ input, textarea, select { font: inherit; }
   align-items: center;
   gap: 16px;
 }
+/* "Track order" is a real link now, so give it the affordance the plain
+   spans beside it don't need. */
+.topbar a {
+  border-bottom: 1px solid rgba(250, 250, 247, 0.35);
+  padding-bottom: 1px;
+  transition: color 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+.topbar a:hover { color: var(--gold); border-bottom-color: var(--gold); }
 .topbar-pill {
   background: var(--gold);
   color: var(--ink);
@@ -310,6 +386,134 @@ input, textarea, select { font: inherit; }
   flex-direction: column;
 }
 
+/* ---- Floating search ---- */
+.search-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-search);
+  background: rgba(10, 10, 10, 0.42);
+}
+/* Centred by margin rather than `translateX(-50%)`: framer-motion owns the
+   panel's `transform` for the entrance/exit, and would overwrite a centring
+   translate declared here. */
+.search-panel {
+  --search-w: min(620px, calc(100vw - 2 * var(--gutter)));
+  position: fixed;
+  top: 88px;
+  left: 50%;
+  margin-left: calc(var(--search-w) * -0.5);
+  width: var(--search-w);
+  max-height: calc(100vh - 128px);
+  z-index: calc(var(--z-search) + 1);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  box-shadow: 0 24px 60px rgba(10, 10, 10, 0.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.search-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line);
+}
+.search-field input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-family: var(--serif);
+  font-size: 24px;
+  color: var(--ink);
+}
+.search-field input::placeholder { color: var(--muted); font-style: italic; }
+.search-close {
+  flex-shrink: 0;
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-kicker);
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  padding: 4px 8px;
+  transition: color 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+.search-close:hover { color: var(--gold); border-color: var(--gold-line); }
+.search-results { overflow-y: auto; padding-bottom: 8px; }
+.search-group {
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-kicker);
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 16px 20px 8px;
+}
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 20px;
+  transition: background 0.2s var(--ease);
+}
+.search-row.is-active { background: var(--gold-tint); }
+.search-row-thumb { flex-shrink: 0; width: 42px; }
+.search-row-thumb-empty {
+  aspect-ratio: 3/4;
+  display: block;
+  border: 1px solid var(--line);
+  background: var(--gold-tint);
+}
+.search-row-name {
+  display: block;
+  font-family: var(--serif);
+  font-size: 18px;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.search-row-meta {
+  display: block;
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-kicker);
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.search-row-price {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+}
+.search-empty { padding: 28px 20px 32px; text-align: center; }
+.search-empty-link {
+  display: block;
+  margin-top: 12px;
+  font-family: var(--mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--track-kicker);
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.search-suggestions { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 20px 18px; }
+.search-suggestions button {
+  font-family: var(--mono);
+  font-size: var(--text-sm);
+  letter-spacing: var(--track-kicker);
+  text-transform: uppercase;
+  border: 1px solid var(--line);
+  padding: 8px 14px;
+  color: var(--muted);
+  transition: color 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+.search-suggestions button:hover { color: var(--gold); border-color: var(--gold-line); }
+
 /* ---- Collections slider ---- */
 .coll-slider {
   display: flex;
@@ -334,6 +538,240 @@ input, textarea, select { font: inherit; }
 @media (max-width: 640px) {
   .coll-slide { flex-basis: calc((100% - 0.2 * 20px) / 1.2); } /* mobile: 1.2 */
 }
+/* ---- Homepage product rail ----
+   Horizontal scroller that deliberately bleeds past the right gutter to the
+   viewport edge, so a partial card is always visible and the row reads as
+   scrollable without needing the arrows.
+
+   The bleed is `margin-right: -gutter` (push the track's right edge out to
+   the window edge) paired with `padding-right: gutter` (so the LAST card
+   still comes to rest against the normal gutter instead of jammed against
+   the glass). `.frame` carries `overflow-x: clip`, which is what stops the
+   negative margin from giving the whole page a horizontal scrollbar.
+
+   Card widths are deliberately fractional — 4.2 / 2.4 / 1.3 per breakpoint,
+   same idiom as `.coll-slide` above — so the cut-off card is a design
+   decision rather than an accident of viewport width. */
+.product-rail {
+  display: flex;
+  gap: 28px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  margin-right: calc(var(--gutter) * -1);
+  padding-right: var(--gutter);
+  padding-bottom: 4px;
+}
+.product-rail::-webkit-scrollbar { display: none; }
+.product-rail > * {
+  flex: 0 0 calc((100% - 3.2 * 28px) / 4.2);
+  scroll-snap-align: start;
+  min-width: 0;
+}
+@media (max-width: 1024px) {
+  .product-rail > * { flex-basis: calc((100% - 1.4 * 28px) / 2.4); }
+}
+@media (max-width: 640px) {
+  .product-rail { gap: 16px; }
+  .product-rail > * { flex-basis: calc((100% - 0.3 * 16px) / 1.3); }
+}
+
+/* ---- PDP gallery ----
+   Main stage is a horizontal scroll-snap track holding every slide, so the
+   image area is swipeable on touch and arrow-driven on desktop. The thumb
+   rail below scrolls independently. Both hide their scrollbars; position is
+   communicated by the active thumb and the arrows, not by a scrollbar.
+
+   The stage is height-driven rather than width-driven: across the 60% media
+   column a 3/4 slide would stand taller than the viewport, so the slide
+   height is capped by --pdp-stage-h and the image crops to fill it. */
+.pdp-stage {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.pdp-stage::-webkit-scrollbar { display: none; }
+.pdp-stage > * {
+  flex: 0 0 100%;
+  min-width: 0;
+  height: var(--pdp-stage-h);
+  scroll-snap-align: center;
+  /* The catalogue's photos arrive at mixed source ratios, so slides are
+     letterboxed rather than cropped — this ground is what the gap reads as. */
+  background: var(--paper-warm);
+}
+
+/* A hairline frame around the stage. With letterboxed slides the paper
+   ground would otherwise bleed into the page and the gallery would have no
+   edge at all. */
+.pdp-stage-frame { border: 1px solid var(--line); }
+
+/* Each slide is a button so the whole image is one zoom target — reset the
+   button chrome and let it behave like the plain div it replaced. */
+.pdp-slide {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: inherit;
+  cursor: zoom-in;
+}
+
+.pdp-zoom-hint {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: rgba(250, 250, 247, 0.9);
+  border: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-kicker);
+  text-transform: uppercase;
+  color: var(--muted);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s var(--ease);
+}
+/* Revealed on hover for pointer users; always visible on touch, where
+   there's no hover to discover it with. */
+.pdp-stage-frame:hover .pdp-zoom-hint { opacity: 1; }
+@media (hover: none) {
+  .pdp-zoom-hint { opacity: 1; }
+}
+
+.pdp-counter {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 2;
+  padding: 6px 10px;
+  background: rgba(250, 250, 247, 0.9);
+  border: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-kicker);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.pdp-thumb-rail {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin-top: 12px;
+  padding-bottom: 2px;
+}
+.pdp-thumb-rail::-webkit-scrollbar { display: none; }
+.pdp-thumb {
+  flex: 0 0 88px;
+  padding: 0;
+  display: block;
+  cursor: pointer;
+  /* Border width stays constant across states — only the colour changes —
+     so selecting a thumb never nudges the rail's layout by half a pixel. */
+  border: 1px solid var(--line);
+  opacity: 0.55;
+  transition: border-color 0.3s var(--ease), opacity 0.3s var(--ease);
+}
+.pdp-thumb:hover { opacity: 0.9; }
+.pdp-thumb[aria-current='true'] {
+  border-color: var(--gold);
+  opacity: 1;
+  /* Doubles the ring without changing the border box, so selecting a thumb
+     still never nudges the rail. */
+  box-shadow: inset 0 0 0 1px var(--gold);
+}
+
+/* Square, like every other control on the site — the circle was the one
+   round element in an otherwise rectilinear system. */
+.pdp-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  background: rgba(250, 250, 247, 0.92);
+  border: 1px solid var(--line);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 14px;
+  transition: background 0.3s var(--ease), opacity 0.3s var(--ease);
+}
+.pdp-nav:hover { background: var(--paper); }
+.pdp-nav:disabled { opacity: 0.3; cursor: default; }
+
+/* ---- Zoom viewer ---- */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-lightbox);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 10, 0.94);
+}
+/* Transparent click-catcher behind the photo and controls — the colour lives
+   on .lightbox so nothing can paint between it and the backdrop. */
+.lightbox-backdrop {
+  position: absolute;
+  inset: 0;
+}
+.lightbox-stage {
+  position: relative;
+  width: min(90vw, 1100px);
+  height: 88vh;
+  cursor: zoom-out;
+}
+.lightbox-close,
+.lightbox-nav {
+  position: absolute;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(250, 250, 247, 0.25);
+  color: var(--paper);
+  font-family: var(--mono);
+  font-size: 20px;
+  transition: border-color 0.3s var(--ease), background 0.3s var(--ease);
+}
+.lightbox-close { top: 24px; right: 24px; }
+.lightbox-nav { top: 50%; transform: translateY(-50%); }
+.lightbox-close:hover,
+.lightbox-nav:hover { border-color: var(--gold); background: rgba(250, 250, 247, 0.08); }
+.lightbox-counter {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-kicker);
+  color: rgba(250, 250, 247, 0.6);
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 640px) {
+  .lightbox-stage { width: 100vw; height: 78vh; }
+  .lightbox-nav { width: 40px; height: 40px; }
+}
+
 .slider-arrow {
   width: 44px;
   height: 44px;
@@ -375,3 +813,119 @@ input, textarea, select { font: inherit; }
   .topbar { justify-content: center; }
   .topbar > *:last-child { display: none; }
 }
+
+/* ---- Editorial layout ----
+   About and the story/policy pages are assembled from three shapes: a
+   two-column split, an even multi-column band, and a single reading column.
+   They live here rather than in inline styles because each one needs
+   breakpoints, and the `style` attribute can't carry a media query — the
+   reason the older pages pinned `1fr 1fr` and overflowed on a phone. */
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(40px, 6vw, 96px);
+  align-items: center;
+}
+.split-start { align-items: start; }
+@media (max-width: 900px) {
+  .split { grid-template-columns: 1fr; gap: 48px; }
+  /* When a split stacks, the picture leads regardless of source order, so
+     alternating rows don't land image-under-copy on one row and over it on
+     the next. */
+  .split > .split-media { order: -1; }
+}
+
+.band {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 40px;
+}
+.band-tight { gap: 0; border: 1px solid var(--line); }
+.band-tight > * { padding: 32px; border-right: 1px solid var(--line); }
+.band-tight > *:last-child { border-right: 0; }
+@media (max-width: 1024px) {
+  .band { grid-template-columns: repeat(2, 1fr); gap: 32px; }
+  /* The 1px cell dividers are drawn per-column, so they have to be re-cut
+     at every breakpoint or the grid ends up with hanging edges. */
+  .band-tight { gap: 0; }
+  .band-tight > *:nth-child(2n) { border-right: 0; }
+  .band-tight > *:nth-child(-n + 2) { border-bottom: 1px solid var(--line); }
+}
+@media (max-width: 560px) {
+  .band { grid-template-columns: 1fr; gap: 24px; }
+  .band-tight > * { border-right: 0; border-bottom: 1px solid var(--line); }
+  .band-tight > *:last-child { border-bottom: 0; }
+}
+
+/* Dark sections re-draw the same dividers in the on-ink palette. */
+.on-ink .band-tight,
+.on-ink .band-tight > * { border-color: var(--line-on-ink); }
+
+/* Single reading column for the policy and guide pages. */
+.prose { max-width: 68ch; }
+.prose p {
+  font-family: var(--serif);
+  font-size: 19px;
+  line-height: 1.75;
+  color: var(--ink);
+  margin-bottom: 20px;
+}
+.prose p:last-child { margin-bottom: 0; }
+.prose h3 {
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 500;
+  margin: 40px 0 14px;
+}
+.prose ul { list-style: none; margin-bottom: 20px; }
+.prose li {
+  position: relative;
+  padding-left: 22px;
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.prose li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 11px;
+  width: 8px;
+  height: 1px;
+  background: var(--gold);
+}
+
+/* Full-bleed editorial figure — the wide banners on About and the story
+   pages. Height is capped so a 21:9 plate doesn't eat a laptop fold. */
+.figure-wide {
+  width: 100%;
+  max-height: 62vh;
+  object-fit: cover;
+  display: block;
+}
+
+/* Data table used by the size guide. */
+.spec-table { width: 100%; border-collapse: collapse; font-family: var(--sans); }
+.spec-table th,
+.spec-table td {
+  text-align: left;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+.spec-table th {
+  font-family: var(--mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 400;
+}
+.spec-table td { font-variant-numeric: tabular-nums; }
+.spec-table tbody tr:hover { background: var(--gold-tint); }
+.spec-table td:first-child { font-family: var(--serif); font-size: 17px; }
+/* Tables are the one thing that genuinely can't reflow — let it scroll in
+   its own box rather than pushing the page sideways. */
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }

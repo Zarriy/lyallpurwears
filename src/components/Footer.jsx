@@ -2,6 +2,46 @@
 import { Link } from 'react-router-dom';
 import { LogoStacked } from './Logo.jsx';
 
+// Social marks, drawn inline so they inherit the footer's paper/gold palette.
+const socials = [
+  {
+    label: 'Instagram',
+    href: '#',
+    path: (
+      <>
+        <rect x="3" y="3" width="18" height="18" rx="5" />
+        <circle cx="12" cy="12" r="4" />
+        <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
+      </>
+    ),
+  },
+  {
+    label: 'Facebook',
+    href: '#',
+    path: <path d="M13.2 21.5v-8h2.6l.4-3.2h-3V8.2c0-.9.3-1.5 1.6-1.5h1.6V3.8c-.3 0-1.2-.1-2.3-.1-2.3 0-3.8 1.4-3.8 3.9v2.7H7.7v3.2h2.6v8z" />,
+  },
+  {
+    label: 'TikTok',
+    href: '#',
+    path: (
+      <>
+        <path d="M14 3v11.5M14 3c.4 2.4 2.3 4.2 4.7 4.4" />
+        <circle cx="10.7" cy="14.5" r="3.3" />
+      </>
+    ),
+  },
+  {
+    label: 'YouTube',
+    href: '#',
+    path: (
+      <>
+        <rect x="2.5" y="5.5" width="19" height="13" rx="4" />
+        <path d="M10.3 9.6l4.6 2.4-4.6 2.4z" />
+      </>
+    ),
+  },
+];
+
 export function Footer() {
   const cols = [
     {
@@ -17,10 +57,10 @@ export function Footer() {
     {
       title: 'Help',
       items: [
-        { label: 'Track Order', to: '/contact' },
-        { label: 'Shipping & Returns', to: '/contact' },
-        { label: 'Size Guide', to: '/contact' },
-        { label: 'FAQ', to: '/contact' },
+        { label: 'Track Order', to: '/track-order' },
+        { label: 'Shipping & Returns', to: '/shipping-returns' },
+        { label: 'Size Guide', to: '/size-guide' },
+        { label: 'FAQ', to: '/faq' },
         { label: 'Contact', to: '/contact' },
       ],
     },
@@ -28,9 +68,10 @@ export function Footer() {
       title: 'About',
       items: [
         { label: 'Our Story', to: '/about' },
-        { label: 'Craftsmanship', to: '/about' },
-        { label: 'Sustainability', to: '/about' },
-        { label: 'The City of Looms', to: '/about' },
+        // Was "Craftsmanship", which implied we do the making. We buy.
+        { label: 'How We Buy', to: '/about' },
+        { label: 'Sustainability', to: '/sustainability' },
+        { label: 'The City of Looms', to: '/city-of-looms' },
       ],
     },
   ];
@@ -42,12 +83,14 @@ export function Footer() {
             <LogoStacked width={170} color="var(--paper)" accent="var(--gold-soft)" />
           </div>
           <p style={{ color: 'var(--paper-fade-60)', fontSize: 13, lineHeight: 1.7, maxWidth: 300, marginBottom: 24 }}>
-            Heritage textiles from the city of looms. Woven in Lyallpur — old Faisalabad — for women who carry tradition forward.
+            Heritage textiles from the city of looms. Chosen in Lyallpur — old Faisalabad — for women who carry tradition forward.
           </p>
           <div style={{ display: 'flex', gap: 12 }}>
-            {['IG', 'FB', 'TT', 'YT'].map((s) => (
-              <a key={s} href="#" aria-label={s} style={{ width: 32, height: 32, border: '1px solid rgba(250,250,247,0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--mono)', fontSize: 10 }}>
-                {s}
+            {socials.map((s) => (
+              <a key={s.label} href={s.href} aria-label={s.label} title={s.label} style={{ width: 32, height: 32, border: '1px solid rgba(250,250,247,0.2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--paper)' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  {s.path}
+                </svg>
               </a>
             ))}
           </div>
@@ -78,9 +121,11 @@ export function Footer() {
         </div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 24, fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(250,250,247,0.5)' }}>
-        <span>© 2026 Lyallpurwears · Faisalabad (Lyallpur), Pakistan</span>
+        <span>© 2026 Lyallpur Wear · Faisalabad (Lyallpur), Pakistan</span>
         <span style={{ display: 'flex', gap: 24 }}>
-          <a href="#">Privacy</a><a href="#">Terms</a><a href="#">Returns</a>
+          <Link to="/privacy">Privacy</Link>
+          <Link to="/terms">Terms</Link>
+          <Link to="/shipping-returns">Returns</Link>
         </span>
       </div>
     </footer>

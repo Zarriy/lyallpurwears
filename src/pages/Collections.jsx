@@ -1,10 +1,10 @@
-// Collections — Lyallpurwears
+// Collections — Lyallpur Wear
 // Editorial product listing. Routes: /collections, /collections/:category
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Reveal, Placeholder, TrustStrip } from '../components/primitives.jsx';
+import { Reveal, TrustStrip } from '../components/primitives.jsx';
 import { ProductCard } from '../components/ProductCard.jsx';
-import { PRODUCTS, CATEGORIES, formatPrice } from '../data/products.js';
+import { useStore } from '../sanity/useStore.js';
 
 const SORTS = [
   { key: 'featured', label: 'Featured' },
@@ -16,16 +16,33 @@ const SORTS = [
 export default function Collections() {
   const { category } = useParams();
   const [sort, setSort] = useState('featured');
+  const { products, categories, settings } = useStore();
 
   const activeCategory = useMemo(
-    () => CATEGORIES.find((c) => c.slug === category) || null,
-    [category]
+    () => categories.find((c) => c.slug === category) || null,
+    [category, categories]
   );
+
+  // The italic line under the title. Studio-editable at two levels:
+  //   - a named collection uses its own Description (Collections → <name>)
+  //   - the "All" view uses Site Settings → Collections Page → intro
+  // Each falls back to the original generated/literal copy when unset, so an
+  // unpopulated CMS still reads as finished.
+  const intro = useMemo(() => {
+    if (activeCategory) {
+      if (activeCategory.description) return activeCategory.description;
+      const tag = activeCategory.tag ? `${activeCategory.tag.toLowerCase()}, ` : '';
+      return `A closer look at our ${activeCategory.en.toLowerCase()} — ${tag}woven in Lyallpur.`;
+    }
+    // We buy cloth rather than make it — see the note at the top of
+    // src/pages/About.jsx. Copy here has to stay on the right side of that.
+    return settings?.collectionsIntro || 'Every fabric we chose this season, gathered in one place.';
+  }, [activeCategory, settings]);
 
   const filtered = useMemo(() => {
     const base = activeCategory
-      ? PRODUCTS.filter((p) => p.category === activeCategory.slug)
-      : PRODUCTS;
+      ? products.filter((p) => p.category === activeCategory.slug)
+      : products;
 
     const list = [...base];
     if (sort === 'price-asc') list.sort((a, b) => a.price - b.price);
@@ -35,11 +52,17 @@ export default function Collections() {
         const aNew = a.badge === 'New' ? 1 : 0;
         const bNew = b.badge === 'New' ? 1 : 0;
         if (aNew !== bNew) return bNew - aNew;
-        return b.id - a.id;
+        // `id` is a numeric static id in the fallback catalogue but a
+        // string Sanity `_id` once CMS-backed — not safe to subtract.
+        // `productNumber` is a real number either way (required by the
+        // product schema; the static entries' array index doubles as it).
+        const bNum = Number(b.productNumber ?? b.id) || 0;
+        const aNum = Number(a.productNumber ?? a.id) || 0;
+        return bNum - aNum;
       });
     }
     return list;
-  }, [activeCategory, sort]);
+  }, [activeCategory, sort, products]);
 
   return (
     <div>
@@ -53,7 +76,7 @@ export default function Collections() {
             {activeCategory ? (
               <>
                 {activeCategory.en}{' '}
-                <span className="urdu" style={{ color: 'var(--gold)', fontStyle: 'italic', fontWeight: 300 }}>
+                <span className="urdu" lang="ur" style={{ color: 'var(--gold)' }}>
                   {activeCategory.ur}
                 </span>
               </>
@@ -64,9 +87,7 @@ export default function Collections() {
             )}
           </h1>
           <p style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 20, color: 'var(--muted)', maxWidth: 520, marginBottom: 24, lineHeight: 1.5 }}>
-            {activeCategory
-              ? `A closer look at our ${activeCategory.en.toLowerCase()} — ${activeCategory.tag.toLowerCase()}, woven in Lyallpur.`
-              : 'Every fabric we weave, every print we cut, gathered in one place.'}
+            {intro}
           </p>
           <div style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--muted)' }}>
             {filtered.length} {filtered.length === 1 ? 'piece' : 'pieces'}
@@ -99,7 +120,7 @@ export default function Collections() {
             >
               All
             </Link>
-            {CATEGORIES.map((c) => (
+            {categories.map((c) => (
               <Link
                 key={c.slug}
                 to={`/collections/${c.slug}`}
@@ -177,7 +198,22 @@ export default function Collections() {
       <section style={{ position: 'relative' }}>
         <Reveal>
           <div style={{ position: 'relative' }}>
-            <Placeholder ratio="21/9" kind="flatlay" label="LYALLPUR LOOMS" />
+            {/* The band is wider than the source's 16:9, so it crops top and
+                bottom — anchored just above centre to keep the loom beam and
+                the spools of yarn in frame. */}
+            <img
+              src="/litmus.png"
+              alt="A hand-loom in Lyallpur, spools of dyed yarn resting on the beam"
+              loading="lazy"
+              decoding="async"
+              style={{
+                width: '100%',
+                aspectRatio: '21/9',
+                objectFit: 'cover',
+                objectPosition: 'center 45%',
+                display: 'block',
+              }}
+            />
             <div
               style={{
                 position: 'absolute',
@@ -185,7 +221,9 @@ export default function Collections() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: 'rgba(10,10,10,0.35)',
+                // Deeper than a flat scrim on the right, where the photo's
+                // windows blow out and would otherwise swallow the quote.
+                background: 'linear-gradient(90deg, rgba(10,10,10,0.35) 0%, rgba(10,10,10,0.5) 45%, rgba(10,10,10,0.55) 100%)',
                 padding: '0 var(--gutter)',
               }}
             >

@@ -1,6 +1,7 @@
-// Full cart page — editorial layout for Lyallpurwears.
+// Full cart page — editorial layout for Lyallpur Wear.
 import { Link } from 'react-router-dom';
-import { Placeholder, TrustStrip } from '../components/primitives.jsx';
+import { TrustStrip } from '../components/primitives.jsx';
+import { SanityImage } from '../components/SanityImage.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import { formatPrice } from '../data/products.js';
 
@@ -11,13 +12,14 @@ function CartLine({ line, setQty, removeItem }) {
   const meta = [product.fabric, product.pieces, [size, color].filter(Boolean).join(' · ')]
     .filter(Boolean)
     .join(' · ');
+  const front = product.images?.find((i) => i.view === 'FRONT') || product.images?.[0] || null;
   return (
     <div
       className="cart-line"
       style={{ display: 'grid', gridTemplateColumns: '120px 1fr auto', gap: 24, padding: '32px 0', borderBottom: '1px solid var(--line)', alignItems: 'flex-start' }}
     >
       <Link to={`/product/${product.slug}`} style={{ display: 'block' }}>
-        <Placeholder ratio="3/4" seed={product.name} label={product.name.toUpperCase()} />
+        <SanityImage asset={front?.asset} alt={front?.alt || product.name} ratio="3/4" seed={product.name} label={product.name.toUpperCase()} />
       </Link>
 
       <div style={{ minWidth: 0 }}>
@@ -25,7 +27,7 @@ function CartLine({ line, setQty, removeItem }) {
           <Link to={`/product/${product.slug}`}>
             {product.name}
             {product.urdu && (
-              <span className="urdu" style={{ fontSize: 16, color: 'var(--gold)', marginLeft: 8 }}>{product.urdu}</span>
+              <span className="urdu" lang="ur" style={{ fontSize: 16, color: 'var(--gold)', marginLeft: 8 }}>{product.urdu}</span>
             )}
           </Link>
         </h3>

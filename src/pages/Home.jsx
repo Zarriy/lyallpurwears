@@ -1,9 +1,11 @@
-// Lyallpurwears — homepage. Editorial luxe lawn store, woven in Lyallpur.
-import { useState, useEffect, useRef } from 'react';
+// Lyallpur Wear — homepage. Editorial luxe lawn store, woven in Lyallpur.
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Reveal, Placeholder, Marquee, TrustStrip } from '../components/primitives.jsx';
 import { ProductCard } from '../components/ProductCard.jsx';
-import { PRODUCTS, formatPrice } from '../data/products.js';
+import { formatPrice } from '../data/products.js';
+import { useStore } from '../sanity/useStore.js';
+import { useHasOverflow } from '../hooks/useHasOverflow.js';
 
 const IMAGES = {
   hero: 'https://cdn.shopify.com/s/files/1/0773/3136/6059/files/moves_hands_down_and_make_202605161624.jpg?v=1778930697',
@@ -16,11 +18,15 @@ const IMAGES = {
   ],
 };
 
-const COLLECTIONS = [
-  { name: 'Nishat', img: 'https://cdn.shopify.com/s/files/1/0773/3136/6059/files/Nishat.jpg?v=1778942943' },
-  { name: 'Pareesa', img: 'https://cdn.shopify.com/s/files/1/0773/3136/6059/files/Gemini_Generated_Image_gj38gfgj38gfgj38.png?v=1778943588' },
-  { name: 'Orient', img: 'https://cdn.shopify.com/s/files/1/0773/3136/6059/files/update_the_dress_of_our_202605161958.jpg?v=1778943642' },
-  { name: 'Bareeze', img: 'https://cdn.shopify.com/s/files/1/0773/3136/6059/files/BAREEZE_BY_AMAL-VOL-23.jpg?v=1778942768' },
+// Curated editorial photography for the collections slider, used ONLY as a
+// per-position fallback: collections seeded from the static catalogue carry
+// no heroImage, and dropping those cards to flat placeholder art would gut
+// the section. Upload a Hero image on a collection in Studio and it wins.
+const COLLECTION_FALLBACK_IMAGES = [
+  'https://cdn.shopify.com/s/files/1/0773/3136/6059/files/Nishat.jpg?v=1778942943',
+  'https://cdn.shopify.com/s/files/1/0773/3136/6059/files/Gemini_Generated_Image_gj38gfgj38gfgj38.png?v=1778943588',
+  'https://cdn.shopify.com/s/files/1/0773/3136/6059/files/update_the_dress_of_our_202605161958.jpg?v=1778943642',
+  'https://cdn.shopify.com/s/files/1/0773/3136/6059/files/BAREEZE_BY_AMAL-VOL-23.jpg?v=1778942768',
 ];
 
 // Real photography tile — cover-fit, right-anchored per art direction.
@@ -36,7 +42,7 @@ function Photo({ src, alt, ratio, pos = 'right center', style }) {
 }
 
 /* ---------------------------------------------------------------- Hero */
-function Hero() {
+function Hero({ products }) {
   const [scrollY, setScrollY] = useState(0);
   useEffect(() => {
     const onScroll = () => {
@@ -52,7 +58,7 @@ function Hero() {
     };
   }, []);
 
-  const hero = PRODUCTS[0]; // Gulab
+  const hero = products[0];
 
   return (
     <section style={{ position: 'relative', height: 'min(760px, 92vh)', overflow: 'hidden', background: 'var(--paper-warm)' }}>
@@ -141,16 +147,40 @@ function Hero() {
 
 /* ---------------------------------------------------------------- Collections slider */
 function CollectionsSlider() {
+  const { categories, settings } = useStore();
   const trackRef = useRef(null);
+
+  // Studio drives both the membership and the order of these cards:
+  // Site Settings → Homepage → Homepage collections. Unset falls back to
+  // every collection (the GROQ query already sorts by displayOrder), so the
+  // section is populated the moment a dataset exists and never renders empty.
+  const slides = useMemo(() => {
+    const source = settings?.homepageCollections?.length
+      ? settings.homepageCollections
+      : categories;
+    return (source || []).filter(Boolean).map((c, i) => ({
+      key: c.slug || c.id || i,
+      name: c.en,
+      tag: c.tag,
+      img: c.heroImageUrl || COLLECTION_FALLBACK_IMAGES[i % COLLECTION_FALLBACK_IMAGES.length],
+      to: c.slug ? `/collections/${c.slug}` : '/collections',
+    }));
+  }, [settings, categories]);
+
+  // Arrows only when the row actually runs past the edge of the screen.
+  const canSlide = useHasOverflow(trackRef, [slides.length]);
 
   const slideBy = (dir) => {
     const track = trackRef.current;
     if (!track) return;
     const card = track.firstElementChild;
     if (!card) return;
-    const step = card.getBoundingClientRect().width + 20;
+    const gap = parseFloat(getComputedStyle(track).columnGap) || 20;
+    const step = card.getBoundingClientRect().width + gap;
     track.scrollBy({ left: dir * step, behavior: 'smooth' });
   };
+
+  if (!slides.length) return null;
 
   return (
     <section style={{ padding: 'var(--section-pad) var(--gutter)', overflow: 'hidden' }}>
@@ -162,24 +192,26 @@ function CollectionsSlider() {
               This season's <em style={{ color: 'var(--gold)', fontWeight: 300 }}>collections.</em>
             </h2>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button aria-label="Previous collections" className="slider-arrow" onClick={() => slideBy(-1)}>←</button>
-            <button aria-label="Next collections" className="slider-arrow" onClick={() => slideBy(1)}>→</button>
-          </div>
+          {canSlide && (
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button aria-label="Previous collections" className="slider-arrow" onClick={() => slideBy(-1)}>←</button>
+              <button aria-label="Next collections" className="slider-arrow" onClick={() => slideBy(1)}>→</button>
+            </div>
+          )}
         </div>
       </Reveal>
       <Reveal>
         <div className="coll-slider" ref={trackRef}>
-          {COLLECTIONS.map((c, i) => (
-            <Link key={c.name} to="/collections" className="coll-slide">
+          {slides.map((c, i) => (
+            <Link key={c.key} to={c.to} className="coll-slide">
               <div style={{ position: 'relative', aspectRatio: '3/4', overflow: 'hidden' }}>
                 <Photo src={c.img} alt={`${c.name} collection`} ratio="3/4" style={{ transition: 'transform 1.2s var(--ease)' }} />
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,10,10,0.55) 0%, transparent 40%)' }} />
                 <div style={{ position: 'absolute', top: 16, left: 16, fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.16em', color: 'var(--paper)' }}>
-                  0{i + 1}
+                  {String(i + 1).padStart(2, '0')}
                 </div>
                 <div style={{ position: 'absolute', bottom: 20, left: 20, right: 20, color: 'var(--paper)' }}>
-                  <div className="kicker" style={{ color: 'var(--gold-soft)', marginBottom: 6 }}>Collection</div>
+                  <div className="kicker" style={{ color: 'var(--gold-soft)', marginBottom: 6 }}>{c.tag || 'Collection'}</div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                     <h3 className="serif-display" style={{ fontSize: 34, color: 'var(--paper)' }}>{c.name}</h3>
                     <span style={{ fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase' }}>Explore →</span>
@@ -209,21 +241,26 @@ function FeaturedProduct() {
           <h2 className="serif-display" style={{ fontSize: 'clamp(40px, 5vw, 76px)', color: 'var(--paper)', marginBottom: 24 }}>
             Threads <em style={{ color: 'var(--gold-soft)', fontWeight: 300 }}>that remember.</em>
           </h2>
+          {/* We are a buying house, not a mill. This block used to read "14
+              Master Artisans / 72hr Per Block Print / 0 Synthetic Dye", which
+              described a workshop we don't run — see the note at the top of
+              src/pages/About.jsx. Keep any figure here to something we can
+              actually stand behind as a buyer. */}
           <p style={{ fontFamily: 'var(--serif)', fontSize: 20, lineHeight: 1.6, color: 'rgba(250,250,247,0.78)', marginBottom: 32, maxWidth: 480 }}>
-            Every piece in the Mehfil edit begins on a hand-loom in Lyallpur — Faisalabad, the city of looms — and finishes under a block-printer's mallet in Multan. Eight bazaars, one clocktower, and slow craft for clothes you'll keep.
+            The Mehfil edit was pulled bolt by bolt out of the cloth bazaars of Lyallpur — Faisalabad, the city of looms — and off the print tables of Multan. We don't own the looms. We just refuse to bring back anything we wouldn't wear ourselves.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32, marginBottom: 40, paddingTop: 32, borderTop: '1px solid rgba(250,250,247,0.12)' }}>
             <div>
-              <div className="figure-stat" style={{ color: 'var(--gold-soft)' }}>14</div>
-              <div className="kicker" style={{ marginTop: 8 }}>Master Artisans</div>
+              <div className="figure-stat" style={{ color: 'var(--gold-soft)' }}>40+</div>
+              <div className="kicker" style={{ marginTop: 8 }}>Mills Visited</div>
             </div>
             <div>
-              <div className="figure-stat" style={{ color: 'var(--gold-soft)' }}>72hr</div>
-              <div className="kicker" style={{ marginTop: 8 }}>Per Block Print</div>
+              <div className="figure-stat" style={{ color: 'var(--gold-soft)' }}>1 in 9</div>
+              <div className="kicker" style={{ marginTop: 8 }}>Bolts We Keep</div>
             </div>
             <div>
-              <div className="figure-stat" style={{ color: 'var(--gold-soft)' }}>0</div>
-              <div className="kicker" style={{ marginTop: 8 }}>Synthetic Dye</div>
+              <div className="figure-stat" style={{ color: 'var(--gold-soft)' }}>8</div>
+              <div className="kicker" style={{ marginTop: 8 }}>Bazaars We Walk</div>
             </div>
           </div>
           <Link className="btn btn-gold" to="/about">Read the Story →</Link>
@@ -233,45 +270,72 @@ function FeaturedProduct() {
   );
 }
 
-/* ---------------------------------------------------------------- Product grid */
-function ProductGrid() {
-  const [filter, setFilter] = useState('All');
-  const tabs = ['All', 'Lawn', 'Khaddar', 'Linen'];
-  const filtered = (filter === 'All'
-    ? PRODUCTS
-    : PRODUCTS.filter((p) => p.category === filter.toLowerCase())
-  ).slice(0, 8);
+/* ---------------------------------------------------------------- Product rail */
+// Horizontal product slider stocked from one Studio-chosen collection
+// (Site Settings → Homepage → Featured collection). Replaced the old
+// four-tab filter grid: the tabs were hardcoded to Lawn/Khaddar/Linen and
+// would silently mismatch any collection renamed or added in the CMS.
+function ProductRail({ products }) {
+  const { settings } = useStore();
+  const railRef = useRef(null);
+
+  const collection = settings?.featuredCollection || null;
+  const limit = settings?.featuredCollectionLimit ?? 12;
+
+  const shown = useMemo(() => {
+    const base = collection ? products.filter((p) => p.category === collection.slug) : products;
+    // A collection that's been emptied — or whose slug no longer matches any
+    // product — falls back to the full catalogue rather than blanking the
+    // section on the homepage.
+    return (base.length ? base : products).slice(0, limit);
+  }, [products, collection, limit]);
+
+  const canSlide = useHasOverflow(railRef, [shown.length]);
+
+  const slideBy = (dir) => {
+    const rail = railRef.current;
+    if (!rail) return;
+    const card = rail.firstElementChild;
+    if (!card) return;
+    // Read the live gap rather than hardcoding it — the rail narrows its gap
+    // at the 640px breakpoint, and a stale constant would drift the step.
+    const gap = parseFloat(getComputedStyle(rail).columnGap) || 28;
+    rail.scrollBy({ left: dir * (card.getBoundingClientRect().width + gap), behavior: 'smooth' });
+  };
+
+  if (!shown.length) return null;
 
   return (
     <section style={{ padding: 'var(--section-pad) var(--gutter)' }}>
       <Reveal>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 24, flexWrap: 'wrap', marginBottom: 56 }}>
           <div>
-            <div className="kicker kicker-gold" style={{ marginBottom: 16 }}>The Edit · Spring '26</div>
+            <div className="kicker kicker-gold" style={{ marginBottom: 16 }}>
+              The Edit · {collection ? collection.en : "Spring '26"}
+            </div>
             <h2 className="serif-display" style={{ fontSize: 'clamp(40px, 5vw, 76px)' }}>
               Most loved <em style={{ color: 'var(--gold)', fontWeight: 300 }}>this week.</em>
             </h2>
           </div>
-          <div style={{ display: 'flex', gap: 8, fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' }}>
-            {tabs.map((t) => (
-              <button
-                key={t}
-                onClick={() => setFilter(t)}
-                style={{
-                  padding: '8px 14px',
-                  color: filter === t ? 'var(--ink)' : 'var(--muted)',
-                  borderBottom: filter === t ? '1px solid var(--ink)' : '1px solid transparent',
-                }}
-              >
-                {t}
-              </button>
-            ))}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+            <Link
+              to={collection ? `/collections/${collection.slug}` : '/collections'}
+              style={{ fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', borderBottom: '1px solid var(--ink)', paddingBottom: 4 }}
+            >
+              View all →
+            </Link>
+            {canSlide && (
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button aria-label="Previous products" className="slider-arrow" onClick={() => slideBy(-1)}>←</button>
+                <button aria-label="Next products" className="slider-arrow" onClick={() => slideBy(1)}>→</button>
+              </div>
+            )}
           </div>
         </div>
       </Reveal>
-      <Reveal stagger>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', columnGap: 28, rowGap: 56 }}>
-          {filtered.map((p) => (
+      <Reveal>
+        <div className="product-rail" ref={railRef}>
+          {shown.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}
         </div>
@@ -438,9 +502,10 @@ function Newsletter() {
 
 /* ---------------------------------------------------------------- Page */
 export default function Home() {
+  const { products } = useStore();
   return (
     <>
-      <Hero />
+      <Hero products={products} />
       <Marquee items={[
         'COD AVAILABLE NATIONWIDE',
         'FREE SHIPPING OVER RS. 5,000',
@@ -451,7 +516,7 @@ export default function Home() {
       ]} />
       <CollectionsSlider />
       <FeaturedProduct />
-      <ProductGrid />
+      <ProductRail products={products} />
       <Lookbook />
       <ReviewsBlock />
       <TrustStrip />
