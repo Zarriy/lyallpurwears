@@ -1,0 +1,108 @@
+# Netlify deploy config.
+#
+# IMPORTANT — Sanity credentials are NOT in this file and must not be.
+# `.env` is gitignored, so the deploy has no copy of it. Vite inlines
+# `import.meta.env.VITE_*` at BUILD time, which means these have to exist as
+# Netlify environment variables before the build runs, not at request time:
+#
+#   VITE_SANITY_PROJECT_ID   (required — without it src/sanity/client.js
+#                             exports a null client and useStore.js silently
+#                             serves the static catalogue instead)
+#   VITE_SANITY_DATASET      (optional, defaults to "production")
+#
+# Set them under Site configuration -> Environment variables, then trigger a
+# fresh deploy — changing them does not rebuild the site on its own.
+#
+# The deployed origin also has to be allowed in Sanity:
+#   Project -> API -> CORS origins -> add https://<your-site>.netlify.app
+# Without it the browser blocks the query, useStore.js catches the failure and
+# falls back to the static catalogue — same visible symptom as a missing key.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Newsletter + Rs. 500 voucher signup (homepage block and footer "The Letter").
+# `netlify/functions/subscribe.js` is a real Netlify v2 function, so this maps
+# the public path onto it. MUST stay above the /api/* 404 below — Netlify
+# applies the first matching rule.
+#
+# Needs these environment variables (Site configuration -> Environment
+# variables). None are VITE_-prefixed, so none reach the browser:
+#   BREVO_API_KEY           (required) Brevo -> SMTP & API -> API keys
+#   BREVO_LIST_ID           (required) numeric id of the contact list
+#   BREVO_DOI_TEMPLATE_ID   (recommended) double opt-in template — the email
+#                           carrying the voucher code. Unset = single opt-in
+#                           and nothing is emailed.
+#   BREVO_DOI_REDIRECT_URL  (optional) where the confirm link lands
+[[redirects]]
+  from = "/api/subscribe"
+  to = "/.netlify/functions/subscribe"
+  status = 200
+  force = true
+
+# Releases the voucher code to confirmed list members only (/welcome calls
+# this). The code itself lives in VOUCHER_CODE here, never in the client
+# bundle — see netlify/functions/voucher.js.
+#   VOUCHER_CODE          (optional, defaults to PEHLA500)
+#   VOUCHER_MIN_SPEND     (optional, defaults to 3000)
+#   VOUCHER_AMOUNT        (optional, defaults to 500)
+#   VOUCHER_TOKEN_SECRET  (optional, falls back to BREVO_API_KEY) — key for the
+#                         encrypted address token in the confirmation redirect,
+#                         so /welcome resolves without the visitor retyping it
+[[redirects]]
+  from = "/api/voucher"
+  to = "/.netlify/functions/voucher"
+  status = 200
+  force = true
+
+# Contact form -> Resend (src/pages/Contact.jsx).
+#   RESEND_API_KEY  (required) resend.com/api-keys
+#   CONTACT_INBOX   (required) where enquiries land; comma-separate for several
+#   CONTACT_FROM    (optional) e.g. "Lyallpur Wear <hello@lyallpurwear.com>".
+#                   Needs a domain verified at resend.com/domains; until then
+#                   the onboarding@resend.dev fallback applies and can ONLY
+#                   deliver to the address that owns the Resend account.
+[[redirects]]
+  from = "/api/contact"
+  to = "/.netlify/functions/contact"
+  status = 200
+  force = true
+
+# Checkout. /api/discount quotes a code against the bag; /api/order prices the
+# bag from Sanity, writes an `order` document, then emails the shop and the
+# customer. Both recompute server-side and never trust client-sent money.
+# Needs SANITY_WRITE_TOKEN (server-only) in addition to the Resend vars above.
+[[redirects]]
+  from = "/api/discount"
+  to = "/.netlify/functions/discount"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/order"
+  to = "/.netlify/functions/order"
+  status = 200
+  force = true
+
+# The review form posts here (src/pages/Product.jsx). `api/submit-review.js` is
+# a Vercel-style `(req, res)` handler and is NOT wired up as a Netlify
+# function, so this returns a clean 404 rather than falling through to the SPA
+# rule below — which would hand back index.html and make `res.json()` fail with
+# a confusing "Unexpected token '<'". Port the handler to Netlify's function
+# signature to enable it.
+[[redirects]]
+  from = "/api/*"
+  to = "/api-not-configured"
+  status = 404
+
+# SPA fallback — must stay LAST. Every route except "/" is client-rendered by
+# React Router (/about, /faq, /collections/lawn, /studio/*), so without this a
+# hard refresh or a shared link 404s on Netlify's static file lookup.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

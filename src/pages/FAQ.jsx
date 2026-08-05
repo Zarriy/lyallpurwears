@@ -20,7 +20,7 @@ const GROUPS = [
     title: 'Shipping',
     items: [
       { title: 'How long does delivery take?', body: 'Two to four working days nationwide from dispatch, and four to seven on remote routes. Stitched-to-measure orders add five to nine working days before they ship.' },
-      { title: 'What does shipping cost?', body: 'A flat Rs. 299, and free on orders over Rs. 5,000. The full breakdown is on the Shipping & Returns page.' },
+      { title: 'What does shipping cost?', body: 'Nothing — delivery is free on every order, anywhere in Pakistan. There is no minimum.' },
       { title: 'Do you ship internationally?', body: 'Not yet — Pakistan only for now. We are working on Gulf and UK rates.' },
       { title: 'How do I track my parcel?', body: 'Your dispatch message carries a tracking link, or use the Track Order page with your order number.' },
     ],
@@ -46,7 +46,8 @@ const GROUPS = [
   {
     title: 'Stitching',
     items: [
-      { title: 'Do you offer stitching?', body: 'Yes, on any unstitched article, charged per piece at checkout. Pick a standard size or send your own measurements — the Size Guide explains both.' },
+      { title: 'Does my order arrive stitched?', body: 'No — everything ships unstitched by default. You get measured lengths of cloth for your own tailor, and "Unstitched" is preselected on every product page.' },
+      { title: 'Do you offer stitching?', body: 'Yes, as a paid add-on on any article. Pick a size instead of "Unstitched" on the product page, then take a standard size or send your own measurements — the Size Guide explains both.' },
       { title: 'How long does stitching add?', body: 'Five to nine working days before the parcel ships.' },
       { title: 'Can I ask for a specific cut?', body: 'Within reason — sleeve length, neckline depth, kameez length and trouser style are all fine. Anything more elaborate, message us first so we can check there is enough cloth in the article.' },
     ],

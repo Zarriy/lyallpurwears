@@ -38,16 +38,43 @@ function Hero() {
 }
 
 function ContactForm() {
-  const [values, setValues] = useState({ name: '', email: '', whatsapp: '', orderNumber: '', message: '' });
+  const [values, setValues] = useState({ name: '', email: '', whatsapp: '', orderNumber: '', message: '', website: '' });
   const [submitted, setSubmitted] = useState(false);
+  const [status, setStatus] = useState('idle'); // idle | sending | error
+  const [error, setError] = useState('');
 
   function update(field) {
     return (e) => setValues((v) => ({ ...v, [field]: e.target.value }));
   }
 
-  function handleSubmit(e) {
+  // This used to be `preventDefault(); setSubmitted(true);` — it showed the
+  // "we'll reply within a day" confirmation below without sending anything
+  // anywhere. Only flip to `submitted` once the server has actually accepted
+  // the message; a customer chasing a broken order must never be told it
+  // arrived when it did not.
+  async function handleSubmit(e) {
     e.preventDefault();
-    setSubmitted(true);
+    if (status === 'sending') return;
+    setStatus('sending');
+    setError('');
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) {
+        setStatus('error');
+        setError(data.error || 'We could not send your message. Please WhatsApp us instead.');
+        return;
+      }
+      setStatus('idle');
+      setSubmitted(true);
+    } catch {
+      setStatus('error');
+      setError('Network error. Please check your connection, or WhatsApp us instead.');
+    }
   }
 
   if (submitted) {
@@ -106,9 +133,30 @@ function ContactForm() {
         style={{ resize: 'vertical' }}
         required
       />
-      <button type="submit" className="btn btn-gold" style={{ alignSelf: 'flex-start', marginTop: 8 }}>
-        Send Message
+      {/* Honeypot — off-screen and out of tab order, so only bots fill it.
+          The server silently drops any submission carrying it. */}
+      <input
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        value={values.website}
+        onChange={update('website')}
+        style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }}
+      />
+      <button
+        type="submit"
+        className="btn btn-gold"
+        style={{ alignSelf: 'flex-start', marginTop: 8 }}
+        disabled={status === 'sending'}
+      >
+        {status === 'sending' ? 'Sending…' : 'Send Message'}
       </button>
+      {status === 'error' && (
+        <p role="status" aria-live="polite" style={{ fontFamily: 'var(--sans)', fontSize: 14, lineHeight: 1.6, color: '#B4534F' }}>
+          {error}
+        </p>
+      )}
     </form>
   );
 }
@@ -231,10 +279,12 @@ function ContactSplit() {
 
 function FAQ() {
   const items = [
-    { title: 'How long does shipping take?', body: 'Orders ship within 2–4 working days nationwide, tracked from Faisalabad to your door via our courier partners. Made-to-order stitched pieces may take an extra 3–5 days.' },
+    // 5–9 working days, matching ShippingReturns.jsx and FAQ.jsx. This said
+    // "an extra 3–5 days", which quietly undercut the other two pages.
+    { title: 'How long does shipping take?', body: 'Orders ship within 2–4 working days nationwide, tracked from Faisalabad to your door via our courier partners. If you added stitching, that adds 5–9 working days before the parcel ships.' },
     { title: 'Is Cash on Delivery available?', body: 'Yes — COD is available on every order across Pakistan. You only pay when your parcel arrives at your doorstep.' },
     { title: 'What is your returns policy?', body: 'We accept returns within 7 days of delivery on unworn, unwashed pieces with tags attached. Message us on WhatsApp with your order number to start a return.' },
-    { title: 'Do you offer stitching services?', body: 'Yes. Every unstitched piece can be stitched to your measurements for an additional fee — select "Stitched" at checkout or tell us your size over WhatsApp.' },
+    { title: 'Do you offer stitching services?', body: 'We sell cloth — everything ships unstitched unless you ask otherwise. If you would rather we stitched it, pick a size instead of "Unstitched" on the product page for an additional fee, or tell us your measurements over WhatsApp.' },
     { title: 'How should I care for hand block-printed fabric?', body: 'Hand wash cold and separately for the first few washes, avoid bleach, iron on reverse, and dry in shade to protect the natural dye.' },
   ];
   return (

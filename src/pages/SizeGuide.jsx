@@ -1,10 +1,12 @@
 // Size Guide — footer pointed this at /contact, which never covered it at all.
 //
-// Two audiences on one page: most of the catalogue is sold *unstitched* (you
-// get lengths of cloth, not a garment), so the yardage table comes first and
-// the body-measurement chart second, for the stitch-to-measure service. The
-// measuring diagram is inline SVG rather than a photograph — it has to carry
-// labelled callouts, and those need to stay crisp and translatable.
+// Everything in the catalogue is sold *unstitched*: you get measured lengths
+// of cloth, not a garment. Stitching is a paid add-on you opt into on the
+// product page, so the yardage table comes first and the body-measurement
+// chart second — and that chart is written to be useful to your own tailor,
+// not only to ours, because most orders never touch our stitching service.
+// The measuring diagram is inline SVG rather than a photograph — it has to
+// carry labelled callouts, and those need to stay crisp and translatable.
 import { Link } from 'react-router-dom';
 import { Reveal, PageHero, Accordion, TrustStrip } from '../components/primitives.jsx';
 
@@ -72,13 +74,14 @@ function Yardage() {
     <section style={{ padding: 'var(--section-pad) var(--gutter)' }}>
       <Reveal>
         <div style={{ marginBottom: 40, maxWidth: 680 }}>
-          <div className="kicker kicker-gold" style={{ marginBottom: 16 }}>Unstitched</div>
+          <div className="kicker kicker-gold" style={{ marginBottom: 16 }}>Unstitched · How It Ships</div>
           <h2 className="serif-display" style={{ fontSize: 'var(--display-md)', marginBottom: 20 }}>
             What's actually <em style={{ color: 'var(--gold)', fontWeight: 300 }}>in the bag.</em>
           </h2>
           <p style={{ fontFamily: 'var(--serif)', fontSize: 19, lineHeight: 1.7, color: 'var(--muted)' }}>
-            Most of what we sell is unstitched: lengths of cloth for your own tailor, not a finished
-            garment. Sizes don't apply — these are the measured lengths you receive.
+            We sell cloth. Every article ships unstitched by default — measured lengths for your own
+            tailor, not a finished garment. Sizes don't apply to what arrives; these are the lengths
+            you receive.
           </p>
         </div>
       </Reveal>
@@ -120,13 +123,15 @@ function Chart() {
     <section style={{ background: 'var(--paper-warm)', padding: 'var(--section-pad) var(--gutter)' }}>
       <Reveal>
         <div style={{ marginBottom: 48, maxWidth: 680 }}>
-          <div className="kicker kicker-gold" style={{ marginBottom: 16 }}>Stitched To Measure</div>
+          <div className="kicker kicker-gold" style={{ marginBottom: 16 }}>Optional · Stitched To Measure</div>
           <h2 className="serif-display" style={{ fontSize: 'var(--display-md)', marginBottom: 20 }}>
-            Our standard <em style={{ color: 'var(--gold)', fontWeight: 300 }}>sizes.</em>
+            If you'd rather <em style={{ color: 'var(--gold)', fontWeight: 300 }}>we stitched it.</em>
           </h2>
           <p style={{ fontFamily: 'var(--serif)', fontSize: 19, lineHeight: 1.7, color: 'var(--muted)' }}>
-            Choose a stitched size at checkout and we cut to these. All figures are body
-            measurements in inches — not the finished garment, which is cut roomier.
+            Stitching is an add-on, not the default — pick a size instead of "Unstitched" on the
+            product page and we cut to the figures below. All are body measurements in inches, not
+            the finished garment, which is cut roomier. Taking your own cloth to your own tailor
+            instead? These are still the numbers to hand them.
           </p>
         </div>
       </Reveal>
@@ -216,9 +221,10 @@ function HowToMeasure() {
 
 function FitNotes() {
   const items = [
-    { title: 'How much ease do you add?', body: 'About 4" at the bust and hip and 3" at the waist, which is the standard relaxed kameez cut in Pakistan. Tell us at checkout if you want it closer or looser and we will note it on the docket.' },
-    { title: 'Does lawn shrink?', body: 'Cotton lawn can lose up to 2% on its first hot wash, mostly in length. We pre-account for it in stitched orders. For unstitched cloth, ask your tailor to wash and dry the fabric before cutting if you plan to wash hot.' },
-    { title: 'Can I send my own measurements instead of a size?', body: 'Yes, and it is the better option if you know them. Select "Stitched" at checkout and send the five figures over WhatsApp with your order number, or write them in the order notes.' },
+    { title: 'Do I have to order it stitched?', body: 'No — unstitched is what we sell and what ships unless you say otherwise. "Unstitched" is preselected on every product page; you only get a stitched piece if you pick a size instead, and that adds a per-piece tailoring charge and five to nine working days.' },
+    { title: 'How much ease do you add?', body: 'About 4" at the bust and hip and 3" at the waist, which is the standard relaxed kameez cut in Pakistan. If you have added stitching, tell us at checkout when you want it closer or looser and we will note it on the docket. If your own tailor is cutting it, these are the allowances to ask them for.' },
+    { title: 'Does lawn shrink?', body: 'Cotton lawn can lose up to 2% on its first hot wash, mostly in length. Since the cloth reaches you uncut, ask your tailor to wash and dry it before cutting if you plan to wash hot. On the stitching add-on we pre-account for it ourselves.' },
+    { title: 'Can I send my own measurements instead of a size?', body: 'Yes, and it is the better option if you know them. Pick any size rather than "Unstitched" on the product page, then send the five figures over WhatsApp with your order number or write them in the order notes — we cut to your numbers, not the size.' },
     { title: 'What if the stitched piece does not fit?', body: 'If it does not match the measurements you gave us, we alter or remake it at our cost. If the measurements were off, we will still alter it once and only charge the tailoring. See Shipping & Returns for the full position.' },
     { title: 'Do you stitch children\'s or plus sizes?', body: 'Beyond XL we stitch to measurement rather than to a size chart, subject to there being enough cloth in the article — a 3.0m shirt piece limits how far we can go. Message us before ordering and we will tell you honestly whether it will work.' },
   ];
@@ -251,7 +257,7 @@ export default function SizeGuide() {
         kicker="Size Guide"
         title="Cloth by the metre,"
         accent="or cut to you."
-        lede="Nearly everything here is sold unstitched. This page covers both what you get in the bag and how to have it stitched to measure."
+        lede="Everything here is sold unstitched — measured lengths of cloth, not a finished garment. This page covers what arrives in the bag, and the measurements to hand your tailor or send to ours if you add stitching."
       />
       <Yardage />
       <Chart />

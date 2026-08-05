@@ -139,20 +139,23 @@ export default {
     },
     {
       name: 'sizes',
-      title: 'Sizes',
+      title: 'Stitched sizes',
       type: 'array',
       group: 'variants',
       of: [{ type: 'string' }],
       options: {
         list: ['XS', 'S', 'M', 'L', 'XL'],
       },
+      description:
+        'Sizes offered on the optional stitching service. The article always ships unstitched by default — the storefront shows an "Unstitched" option first and only offers these sizes if you list any. Leave empty for cloth you will not stitch.',
     },
     {
       name: 'unstitchedNote',
-      title: 'Unstitched note',
+      title: 'Stitching note',
       type: 'string',
       group: 'variants',
-      description: 'e.g. "Or order unstitched · Save Rs. 1,200" — shown under the size selector.',
+      description:
+        'Shown under the size selector once a stitched size is picked, e.g. "Stitched to measure · +Rs. 1,200". Field name is legacy — it used to hold the reverse ("Or order unstitched…") back when the storefront treated stitched as the default.',
     },
     {
       name: 'description',

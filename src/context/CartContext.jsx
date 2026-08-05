@@ -87,13 +87,13 @@ export function CartProvider({ children }) {
       .filter((l) => l.product);
     const count = items.reduce((n, l) => n + l.qty, 0);
     const subtotal = items.reduce((n, l) => n + l.qty * l.product.price, 0);
-    const freeShippingThreshold = 5000;
+    // No `freeShippingThreshold`/`shippingRemaining` here any more: shipping is
+    // free on every order, so there is no threshold to be short of. They fed
+    // the drawer's "Rs X away from free shipping" bar, which is gone.
     return {
       items,
       count,
       subtotal,
-      freeShippingThreshold,
-      shippingRemaining: Math.max(0, freeShippingThreshold - subtotal),
       addItem: (productId, opts = {}) => {
         dispatch({ type: 'add', productId, ...opts });
         setDrawerOpen(true);

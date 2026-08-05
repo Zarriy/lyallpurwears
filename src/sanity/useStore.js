@@ -57,7 +57,21 @@ export function StoreProvider({ children }) {
   const [state, setState] = useState(initialState);
 
   useEffect(() => {
-    if (!client) return undefined; // no project configured — stay on static fallback
+    if (!client) {
+      // Stay on the static fallback. This is the single most confusing
+      // deploy failure the app has: the site looks finished but none of the
+      // CMS content is there, and a missing build-time key is visually
+      // indistinguishable from a CORS block. Say which one it is.
+      if (typeof console !== 'undefined') {
+        console.warn(
+          '[sanity] VITE_SANITY_PROJECT_ID was not set at build time — serving the static catalogue. ' +
+            'Vite inlines this variable during `npm run build`, so it must exist in the build ' +
+            'environment (on Netlify: Site configuration -> Environment variables) and the site ' +
+            'must be rebuilt afterwards.'
+        );
+      }
+      return undefined;
+    }
 
     let cancelled = false;
 

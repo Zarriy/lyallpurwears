@@ -22,6 +22,7 @@ import Terms from './pages/Terms.jsx';
 import TrackOrder from './pages/TrackOrder.jsx';
 import Cart from './pages/Cart.jsx';
 import Checkout from './pages/Checkout.jsx';
+import Welcome from './pages/Welcome.jsx';
 import NotFound from './pages/NotFound.jsx';
 
 // Code-split — `sanity` (the Studio package) must never land in the
@@ -89,6 +90,9 @@ function AnimatedRoutes() {
         <Route path="/track-order" element={<PageTransition><TrackOrder /></PageTransition>} />
         <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
         <Route path="/checkout" element={<PageTransition><Checkout /></PageTransition>} />
+        {/* Brevo's double opt-in confirmation link lands here — see
+            BREVO_DOI_REDIRECT_URL and the note atop Welcome.jsx. */}
+        <Route path="/welcome" element={<PageTransition><Welcome /></PageTransition>} />
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
     </AnimatePresence>

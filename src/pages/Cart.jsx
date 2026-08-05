@@ -5,11 +5,11 @@ import { SanityImage } from '../components/SanityImage.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import { formatPrice } from '../data/products.js';
 
-const SHIPPING_FLAT = 299;
-
 function CartLine({ line, setQty, removeItem }) {
   const { key, qty, size, color, product } = line;
-  const meta = [product.fabric, product.pieces, [size, color].filter(Boolean).join(' · ')]
+  // Null size == unstitched (the default sale) — spelled out so the customer
+  // sees what's in the parcel before checkout, not just an absent size.
+  const meta = [product.fabric, product.pieces, [size ? `Stitched ${size}` : 'Unstitched', color].filter(Boolean).join(' · ')]
     .filter(Boolean)
     .join(' · ');
   const front = product.images?.find((i) => i.view === 'FRONT') || product.images?.[0] || null;
@@ -84,7 +84,7 @@ function CartLine({ line, setQty, removeItem }) {
 }
 
 export default function Cart() {
-  const { items, subtotal, freeShippingThreshold, setQty, removeItem } = useCart();
+  const { items, subtotal, setQty, removeItem } = useCart();
 
   if (items.length === 0) {
     return (
@@ -103,9 +103,9 @@ export default function Cart() {
     );
   }
 
-  const freeShipping = subtotal >= freeShippingThreshold;
-  const shipping = freeShipping ? 0 : SHIPPING_FLAT;
-  const total = subtotal + shipping;
+  // Free on every order, and listed prices are tax-inclusive — so the total
+  // is simply the subtotal. Was a Rs. 299 flat rate below a Rs. 5,000 threshold.
+  const total = subtotal;
 
   return (
     <div>
@@ -140,15 +140,11 @@ export default function Cart() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14, paddingBottom: 20, borderBottom: '1px solid var(--line)' }}>
               <Row label="Subtotal" value={formatPrice(subtotal)} />
-              <Row
-                label="Shipping"
-                value={freeShipping ? 'Free' : formatPrice(SHIPPING_FLAT)}
-                sub={freeShipping ? undefined : 'Free over Rs. 5,000'}
-              />
+              <Row label="Shipping" value="Free" sub="Nationwide, on every order" />
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '20px 0' }}>
-              <span style={{ fontFamily: 'var(--serif)', fontSize: 20 }}>Estimated Total</span>
+              <span style={{ fontFamily: 'var(--serif)', fontSize: 20 }}>Total</span>
               <span style={{ fontFamily: 'var(--serif)', fontSize: 30, fontWeight: 500 }}>{formatPrice(total)}</span>
             </div>
 

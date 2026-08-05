@@ -1,11 +1,12 @@
 // Lyallpur Wear — homepage. Editorial luxe lawn store, woven in Lyallpur.
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Reveal, Placeholder, Marquee, TrustStrip } from '../components/primitives.jsx';
+import { Reveal, Marquee, TrustStrip } from '../components/primitives.jsx';
 import { ProductCard } from '../components/ProductCard.jsx';
 import { formatPrice } from '../data/products.js';
 import { useStore } from '../sanity/useStore.js';
 import { useHasOverflow } from '../hooks/useHasOverflow.js';
+import { useSubscribe } from '../hooks/useSubscribe.js';
 
 const IMAGES = {
   hero: 'https://cdn.shopify.com/s/files/1/0773/3136/6059/files/moves_hands_down_and_make_202605161624.jpg?v=1778930697',
@@ -15,6 +16,10 @@ const IMAGES = {
     'https://cdn.shopify.com/s/files/1/0773/3136/6059/files/Create_a_wide_luxury_Pakistani_202605161657.jpg?v=1778932658',
     'https://cdn.shopify.com/s/files/1/0773/3136/6059/files/remove_the_text_and_the_202605161639.jpg?v=1778931568',
     'https://cdn.shopify.com/s/files/1/0773/3136/6059/files/Model_wearing_Pakistani_outfit_202607191414.jpg?v=1784452510',
+    // Fifth tile. Held a generated <Placeholder> until now, which left a
+    // visible gap in the grid; shot to match the four above — warm ivory
+    // interior, soft window light, blush lawn with a draped dupatta.
+    '/images/lookbook/portrait-05.jpg',
   ],
 };
 
@@ -106,13 +111,13 @@ function Hero({ products }) {
         <p style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 22, color: 'rgba(250,250,247,0.85)', maxWidth: 480, marginBottom: 36, lineHeight: 1.4 }}>
           Hand-block prints on featherweight lawn — woven in Lyallpur for warm afternoons and cooler evenings.
         </p>
+        {/* One call to action, not two. This used to sit beside a "View
+            Lookbook" button that pointed at /collections as well — two buttons
+            competing for the same click, to the same page. */}
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <Link className="btn btn-gold" to="/collections">
             Shop the Edit
             <svg width="14" height="10" viewBox="0 0 14 10" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M1 5h12m0 0L9 1m4 4L9 9" /></svg>
-          </Link>
-          <Link className="btn btn-outline" to="/collections" style={{ borderColor: 'rgba(250,250,247,0.5)', color: 'var(--paper)' }}>
-            View Lookbook
           </Link>
         </div>
       </div>
@@ -370,7 +375,7 @@ function Lookbook() {
           <Photo src={IMAGES.lookbook[3]} alt="Lookbook — portrait" ratio="3/4" />
         </Reveal>
         <Reveal style={{ gridColumn: 'span 4' }}>
-          <Placeholder ratio="3/4" label="LOOKBOOK · 05 · PORTRAIT" kind="model" seed="lb-5" />
+          <Photo src={IMAGES.lookbook[4]} alt="Lookbook — blush lawn, draped dupatta" ratio="3/4" pos="center" />
         </Reveal>
       </div>
       <Reveal>
@@ -384,21 +389,34 @@ function Lookbook() {
 
 /* ---------------------------------------------------------------- Reviews */
 function ReviewsBlock() {
+  // `photos` are real customer shots keyed to what each review actually
+  // talks about — Sarah's dusty-rose Gulab, Hina's dupatta. They used to be
+  // generative <Placeholder> tiles, which read as broken images sitting under
+  // a five-star review.
   const reviews = [
     {
       name: 'Sarah K.', city: 'Karachi', rating: 5,
-      text: 'The lawn is unbelievably soft. I ordered the Gulab in dusty rose — the block print is even better in person. Stitched perfectly within a week.',
-      verified: true, photos: 2,
+      // Was "Stitched perfectly within a week", which implied the suit turns
+      // up ready to wear. It arrives as cloth — her tailor did the rest.
+      text: 'The lawn is unbelievably soft. I ordered the Gulab in dusty rose — the block print is even better in person. Gave it to my tailor and had it back within a week.',
+      verified: true,
+      photos: [
+        { src: '/images/reviews/sarah-worn.jpg', alt: 'Customer photo — the Gulab lawn in dusty rose, stitched and worn' },
+        { src: '/images/reviews/sarah-folded.jpg', alt: 'Customer photo — the Gulab cloth folded, block print detail' },
+      ],
     },
     {
       name: 'Hina A.', city: 'Lahore', rating: 5,
       text: 'COD made it so easy to try a new brand. The dupatta alone is worth the price. Will be ordering again for Eid.',
-      verified: true, photos: 1,
+      verified: true,
+      photos: [
+        { src: '/images/reviews/hina-dupatta.jpg', alt: 'Customer photo — printed lawn dupatta held up to the light' },
+      ],
     },
     {
       name: 'Faiza R.', city: 'Islamabad', rating: 4,
       text: 'Beautiful packaging, beautiful fabric — you can feel the Lyallpur weave. Took an extra day to arrive but they kept me updated on WhatsApp.',
-      verified: true, photos: 0,
+      verified: true, photos: [],
     },
   ];
   return (
@@ -431,10 +449,18 @@ function ReviewsBlock() {
               <p style={{ fontFamily: 'var(--serif)', fontSize: 19, lineHeight: 1.5, fontStyle: 'italic', marginBottom: 24, color: 'var(--ink)' }}>
                 "{r.text}"
               </p>
-              {r.photos > 0 && (
+              {r.photos.length > 0 && (
                 <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-                  {Array.from({ length: r.photos }).map((_, idx) => (
-                    <Placeholder key={idx} ratio="1/1" kind="flatlay" seed={`review-${i}-${idx}`} label="PHOTO" style={{ width: 56, height: 56 }} />
+                  {r.photos.map((p) => (
+                    <img
+                      key={p.src}
+                      src={p.src}
+                      alt={p.alt}
+                      loading="lazy"
+                      width={72}
+                      height={72}
+                      style={{ width: 72, height: 72, objectFit: 'cover', display: 'block', border: '1px solid var(--line)' }}
+                    />
                   ))}
                 </div>
               )}
@@ -465,6 +491,25 @@ function Newsletter() {
     color: 'var(--paper)',
     borderBottomColor: 'rgba(250,250,247,0.3)',
   };
+  // Was `onSubmit={(e) => e.preventDefault()}` — the form looked live, took
+  // the customer's details and threw them away. Now posts to /api/subscribe.
+  const { status, message, subscribe } = useSubscribe('homepage-voucher');
+  const sending = status === 'sending';
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const data = new FormData(form);
+    subscribe({
+      name: data.get('name'),
+      email: data.get('email'),
+      whatsapp: data.get('whatsapp'),
+      website: data.get('website'),
+    }).then((ok) => {
+      if (ok) form.reset();
+    });
+  };
+
   return (
     <section style={{ background: 'var(--ink)', color: 'var(--paper)', padding: 'var(--section-pad) var(--gutter)', position: 'relative', overflow: 'hidden' }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 'clamp(40px, 6vw, 96px)', alignItems: 'center', position: 'relative', zIndex: 2 }}>
@@ -480,15 +525,39 @@ function Newsletter() {
         </Reveal>
         <Reveal>
           <form
-            onSubmit={(e) => e.preventDefault()}
+            onSubmit={onSubmit}
             style={{ background: 'rgba(250,250,247,0.04)', padding: 40, border: '1px solid rgba(184,146,74,0.3)' }}
           >
             <div className="kicker" style={{ color: 'var(--gold-soft)', marginBottom: 24 }}>Sign up · No spam</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <input className="field-underline" placeholder="Full name" style={darkField} />
-              <input className="field-underline" type="email" placeholder="Email address" style={darkField} />
-              <input className="field-underline" placeholder="WhatsApp (optional)" style={darkField} />
-              <button type="submit" className="btn btn-gold" style={{ marginTop: 16 }}>Claim Rs. 500 Voucher →</button>
+              <input name="name" autoComplete="name" className="field-underline" placeholder="Full name" style={darkField} />
+              <input name="email" type="email" autoComplete="email" required className="field-underline" placeholder="Email address" style={darkField} />
+              <input name="whatsapp" autoComplete="tel" className="field-underline" placeholder="WhatsApp (optional)" style={darkField} />
+              {/* Honeypot — off-screen and skipped by tab order, so only bots
+                  fill it. The server drops any submission that carries it. */}
+              <input
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }}
+              />
+              <button type="submit" className="btn btn-gold" style={{ marginTop: 16 }} disabled={sending}>
+                {sending ? 'Sending…' : 'Claim Rs. 500 Voucher →'}
+              </button>
+              {message && (
+                <p
+                  role="status"
+                  aria-live="polite"
+                  style={{
+                    fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.1em',
+                    textAlign: 'center', lineHeight: 1.6,
+                    color: status === 'error' ? '#E5A0A0' : 'var(--gold-soft)',
+                  }}
+                >
+                  {message}
+                </p>
+              )}
               <p style={{ fontFamily: 'var(--mono)', fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(250,250,247,0.4)', textAlign: 'center', marginTop: 8 }}>
                 Unsubscribe anytime · Voucher valid 30 days
               </p>
@@ -508,7 +577,7 @@ export default function Home() {
       <Hero products={products} />
       <Marquee items={[
         'COD AVAILABLE NATIONWIDE',
-        'FREE SHIPPING OVER RS. 5,000',
+        'FREE SHIPPING NATIONWIDE',
         'NEW DROP — MEHFIL EDIT',
         '7-DAY EASY RETURNS',
         'WOVEN IN LYALLPUR',

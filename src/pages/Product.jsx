@@ -21,14 +21,16 @@ const VIEWS = ['FRONT', 'BACK', 'DETAIL', 'TEXTILE', 'STYLED'];
 
 const DEFAULT_SHIPPING_CELLS = [
   { label: 'Cash on Delivery', sublabel: 'Pay when it arrives', kind: 'cod' },
-  { label: 'Free shipping', sublabel: 'Orders over Rs. 5,000', kind: 'shipping' },
+  { label: 'Free shipping', sublabel: 'On every order', kind: 'shipping' },
   { label: '7-Day Returns', sublabel: 'No questions asked', kind: 'returns' },
   { label: 'Authentic Lawn', sublabel: 'Woven in Lyallpur', kind: 'authentic' },
 ];
 
 const DEFAULT_CARE_INSTRUCTIONS = 'Cold hand wash separately. Do not bleach. Iron on reverse. Dry in shade.';
 const DEFAULT_SHIPPING_RETURNS = '2–4 working days nationwide. Cash on Delivery available. 7-day easy returns on unworn pieces with original tags.';
-const DEFAULT_UNSTITCHED_NOTE = 'Or order unstitched · Save Rs. 1,200';
+// Shown only once a stitched size is chosen. Unstitched is the default state
+// of the selector, so this describes the paid add-on rather than the product.
+const DEFAULT_STITCHING_NOTE = 'Stitched to measure · +Rs. 1,200 · Adds 5–9 days';
 const DEFAULT_EDITION_LABEL = 'Mehfil Edit';
 const DEFAULT_STOCK_TEMPLATE = 'Only {stock} pieces left';
 const DEFAULT_VIEWING_TEMPLATE = '{count} people viewing this in the last hour';
@@ -263,62 +265,84 @@ const sizeGuideLinkStyle = {
   color: 'var(--ink)',
 };
 
-function SizeSelector({ sizes, selected, onSelect, unstitchedNote, sizeGuideUrl }) {
+function pillStyle(on) {
+  return {
+    minWidth: 52,
+    height: 52,
+    padding: '0 16px',
+    border: on ? '1.5px solid var(--ink)' : '1px solid var(--line)',
+    background: on ? 'var(--ink)' : 'var(--paper)',
+    color: on ? 'var(--paper)' : 'var(--ink)',
+    fontFamily: 'var(--mono)',
+    fontSize: 12,
+    letterSpacing: '0.1em',
+    cursor: 'pointer',
+    transition: 'all 0.3s var(--ease)',
+  };
+}
+
+const shipsNoteStyle = {
+  marginTop: 12,
+  fontFamily: 'var(--mono)',
+  fontSize: 10,
+  letterSpacing: '0.14em',
+  textTransform: 'uppercase',
+  color: 'var(--muted)',
+};
+
+// We sell cloth. Stitching is a paid add-on, so unstitched is the default
+// state of this control and picking a size is how you opt in — the reverse of
+// how it read before, which labelled the row "Size · Stitched", preselected M
+// and demoted unstitched to a footnote ("Or order unstitched"). That framed
+// the add-on as the product and the product as the alternative.
+//
+// Renders on EVERY product, including the ones with no stitched sizes set —
+// which today is all of them. Gating the whole block on `sizes.length > 0`
+// (as it was) meant the page never said what arrives in the parcel at all:
+// "3 Piece Lawn — Shirt · Dupatta · Trouser" reads like a finished outfit
+// unless something states otherwise. With no sizes configured this degrades
+// to a plain "ships unstitched" line rather than a one-option button group.
+function StitchingSelector({ sizes, selected, onSelect, stitchingNote, sizeGuideUrl }) {
   const isExternal = sizeGuideUrl && /^https?:\/\//i.test(sizeGuideUrl);
+  const unstitched = selected == null;
+  const offersStitching = sizes.length > 0;
+
+  const guideLink = sizeGuideUrl ? (
+    isExternal ? (
+      <a href={sizeGuideUrl} target="_blank" rel="noopener noreferrer" style={sizeGuideLinkStyle}>
+        Size guide ↗
+      </a>
+    ) : (
+      <Link to={sizeGuideUrl} style={sizeGuideLinkStyle}>
+        Size guide ↗
+      </Link>
+    )
+  ) : (
+    <Link to="/size-guide" style={sizeGuideLinkStyle}>
+      Size guide ↗
+    </Link>
+  );
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-        <span className="kicker">Size · Stitched</span>
-        {sizeGuideUrl ? (
-          isExternal ? (
-            <a href={sizeGuideUrl} target="_blank" rel="noopener noreferrer" style={sizeGuideLinkStyle}>
-              Size guide ↗
-            </a>
-          ) : (
-            <Link to={sizeGuideUrl} style={sizeGuideLinkStyle}>
-              Size guide ↗
-            </Link>
-          )
-        ) : (
-          <span style={{ ...sizeGuideLinkStyle, opacity: 0.5 }}>Size guide ↗</span>
-        )}
+        <span className="kicker">{offersStitching ? 'Stitching · Optional' : 'Unstitched · How It Ships'}</span>
+        {guideLink}
       </div>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        {sizes.map((s) => {
-          const on = selected === s;
-          return (
-            <button
-              key={s}
-              onClick={() => onSelect(s)}
-              style={{
-                width: 52,
-                height: 52,
-                border: on ? '1.5px solid var(--ink)' : '1px solid var(--line)',
-                background: on ? 'var(--ink)' : 'var(--paper)',
-                color: on ? 'var(--paper)' : 'var(--ink)',
-                fontFamily: 'var(--mono)',
-                fontSize: 12,
-                letterSpacing: '0.1em',
-                cursor: 'pointer',
-                transition: 'all 0.3s var(--ease)',
-              }}
-            >
+      {offersStitching && (
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button onClick={() => onSelect(null)} aria-pressed={unstitched} style={pillStyle(unstitched)}>
+            UNSTITCHED
+          </button>
+          {sizes.map((s) => (
+            <button key={s} onClick={() => onSelect(s)} aria-pressed={selected === s} style={pillStyle(selected === s)}>
               {s}
             </button>
-          );
-        })}
-      </div>
-      <div
-        style={{
-          marginTop: 12,
-          fontFamily: 'var(--mono)',
-          fontSize: 10,
-          letterSpacing: '0.14em',
-          textTransform: 'uppercase',
-          color: 'var(--muted)',
-        }}
-      >
-        {unstitchedNote}
+          ))}
+        </div>
+      )}
+      <div style={offersStitching ? shipsNoteStyle : { ...shipsNoteStyle, marginTop: 0 }}>
+        {unstitched ? 'Measured lengths of cloth · Stitching not included' : stitchingNote}
       </div>
     </div>
   );
@@ -892,9 +916,11 @@ export default function Product() {
   useLayoutEffect(() => {
     if (!product) return;
     const c = product.colours ?? [];
-    const s = product.sizes ?? [];
     setColor(c[0]?.name ?? null);
-    setSize(s.includes('M') ? 'M' : s[0] ?? null);
+    // No size preselected: null *is* unstitched, which is what we actually
+    // sell. Preselecting M silently added a Rs. 1,200 stitching charge to
+    // every cart line for a customer who only ever wanted the cloth.
+    setSize(null);
     setQty(1);
   }, [product]);
 
@@ -912,7 +938,9 @@ export default function Product() {
   const editionLabel = product.editionLabel || settings?.defaultEditionLabel || DEFAULT_EDITION_LABEL;
   const careInstructions = product.careInstructions || settings?.defaultCareInstructions || DEFAULT_CARE_INSTRUCTIONS;
   const shippingReturns = product.shippingReturns || settings?.defaultShippingReturns || DEFAULT_SHIPPING_RETURNS;
-  const unstitchedNote = product.unstitchedNote || DEFAULT_UNSTITCHED_NOTE;
+  // Sanity field is still named `unstitchedNote` (renaming it would need a
+  // data migration); its Studio title/description now describe the add-on.
+  const stitchingNote = product.unstitchedNote || DEFAULT_STITCHING_NOTE;
   const stockTemplate = settings?.stockUrgencyTemplate || DEFAULT_STOCK_TEMPLATE;
   const viewingTemplate = settings?.viewingNowTemplate || DEFAULT_VIEWING_TEMPLATE;
   const viewingCount = settings?.viewingNowCount ?? DEFAULT_VIEWING_COUNT;
@@ -1003,14 +1031,10 @@ export default function Product() {
 
             <StockUrgency stock={product.stock} stockTemplate={stockTemplate} viewingTemplate={viewingTemplate} viewingCount={viewingCount} />
 
-            {(colours.length > 0 || sizes.length > 0) && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 28, marginBottom: 32 }}>
-                {colours.length > 0 && <ColorSwatches colors={colours} selected={color} onSelect={setColor} />}
-                {sizes.length > 0 && (
-                  <SizeSelector sizes={sizes} selected={size} onSelect={setSize} unstitchedNote={unstitchedNote} sizeGuideUrl={sizeGuideUrl} />
-                )}
-              </div>
-            )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 28, marginBottom: 32 }}>
+              {colours.length > 0 && <ColorSwatches colors={colours} selected={color} onSelect={setColor} />}
+              <StitchingSelector sizes={sizes} selected={size} onSelect={setSize} stitchingNote={stitchingNote} sizeGuideUrl={sizeGuideUrl} />
+            </div>
 
             {/* Qty + Add */}
             <div style={{ display: 'flex', gap: 12 }}>

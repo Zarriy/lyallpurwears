@@ -128,11 +128,13 @@ export default {
     },
     {
       name: 'freeShippingThreshold',
-      title: 'Free shipping threshold (PKR)',
+      title: 'Free shipping threshold (PKR) — not in use',
       type: 'number',
       group: 'pdp',
-      initialValue: 5000,
-      validation: (Rule) => Rule.required().min(0),
+      initialValue: 0,
+      description:
+        'Currently ignored: delivery is free on every order with no minimum, set in netlify/functions/_pricing.js (FLAT_SHIPPING = 0). Kept only so the field is here if a threshold is ever reintroduced — changing it now has no effect on the storefront.',
+      validation: (Rule) => Rule.min(0),
     },
     {
       name: 'shippingCells',

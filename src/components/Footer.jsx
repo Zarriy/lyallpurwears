@@ -1,6 +1,7 @@
 // Site footer — stacked SVG logo, link columns, newsletter.
 import { Link } from 'react-router-dom';
 import { LogoStacked } from './Logo.jsx';
+import { useSubscribe } from '../hooks/useSubscribe.js';
 
 // Social marks, drawn inline so they inherit the footer's paper/gold palette.
 const socials = [
@@ -41,6 +42,69 @@ const socials = [
     ),
   },
 ];
+
+// "The Letter" — same endpoint and state machine as the homepage voucher
+// block, tagged with its own source so you can see in Brevo which of the two
+// actually converts. Was a form that only called preventDefault().
+function LetterSignup() {
+  const { status, message, subscribe } = useSubscribe('footer-letter');
+  const sending = status === 'sending';
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const data = new FormData(form);
+    subscribe({ email: data.get('email'), website: data.get('website') }).then((ok) => {
+      if (ok) form.reset();
+    });
+  };
+
+  return (
+    <div>
+      <div className="kicker" style={{ color: 'var(--gold-soft)', marginBottom: 18 }}>The Letter</div>
+      <p style={{ color: 'var(--paper-fade-60)', fontSize: 13, lineHeight: 1.7, marginBottom: 16 }}>
+        New drops, private previews and Rs. 500 off your first order.
+      </p>
+      <form onSubmit={onSubmit} style={{ display: 'flex', borderBottom: '1px solid rgba(250,250,247,0.3)' }}>
+        <input
+          type="email"
+          name="email"
+          autoComplete="email"
+          required
+          placeholder="Email address"
+          style={{ flex: 1, background: 'transparent', border: 0, color: 'var(--paper)', padding: '10px 0', fontFamily: 'var(--sans)', fontSize: 13, outline: 'none' }}
+        />
+        {/* Honeypot — see the matching note on the homepage form. */}
+        <input
+          name="website"
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }}
+        />
+        <button
+          type="submit"
+          disabled={sending}
+          style={{ color: 'var(--gold-soft)', fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' }}
+        >
+          {sending ? '…' : 'Join →'}
+        </button>
+      </form>
+      {message && (
+        <p
+          role="status"
+          aria-live="polite"
+          style={{
+            marginTop: 10, fontSize: 11, lineHeight: 1.6,
+            color: status === 'error' ? '#E5A0A0' : 'var(--gold-soft)',
+          }}
+        >
+          {message}
+        </p>
+      )}
+    </div>
+  );
+}
 
 export function Footer() {
   const cols = [
@@ -105,20 +169,7 @@ export function Footer() {
             </ul>
           </div>
         ))}
-        <div>
-          <div className="kicker" style={{ color: 'var(--gold-soft)', marginBottom: 18 }}>The Letter</div>
-          <p style={{ color: 'var(--paper-fade-60)', fontSize: 13, lineHeight: 1.7, marginBottom: 16 }}>
-            New drops, private previews and Rs. 500 off your first order.
-          </p>
-          <form onSubmit={(e) => e.preventDefault()} style={{ display: 'flex', borderBottom: '1px solid rgba(250,250,247,0.3)' }}>
-            <input
-              type="email"
-              placeholder="Email address"
-              style={{ flex: 1, background: 'transparent', border: 0, color: 'var(--paper)', padding: '10px 0', fontFamily: 'var(--sans)', fontSize: 13, outline: 'none' }}
-            />
-            <button style={{ color: 'var(--gold-soft)', fontFamily: 'var(--mono)', fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase' }}>Join →</button>
-          </form>
-        </div>
+        <LetterSignup />
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 24, fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(250,250,247,0.5)' }}>
         <span>© 2026 Lyallpur Wear · Faisalabad (Lyallpur), Pakistan</span>

@@ -1,7 +1,18 @@
 // Custom desk structure:
 //   - Site Settings is pinned as a true singleton (no list, can't be duplicated/deleted — see sanity.config.js).
 //   - Reviews gets a moderation-queue split: Pending approval vs Approved.
-import { CogIcon, TagIcon, PackageIcon, ColorWheelIcon, CommentIcon, ClockIcon, CheckmarkCircleIcon } from '@sanity/icons';
+import {
+  CogIcon,
+  TagIcon,
+  PackageIcon,
+  ColorWheelIcon,
+  CommentIcon,
+  ClockIcon,
+  CheckmarkCircleIcon,
+  BasketIcon,
+  RocketIcon,
+  ArchiveIcon,
+} from '@sanity/icons';
 
 export const SINGLETON_TYPES = new Set(['siteSettings']);
 
@@ -36,6 +47,97 @@ export const structure = (S, context) =>
         .title('Colours')
         .icon(ColorWheelIcon)
         .child(S.documentTypeList('colour').title('Colours')),
+
+      S.divider(),
+
+      // Orders — a fulfilment queue, not a list. "To fulfil" is the only view
+      // that matters day to day: everything not yet delivered, cancelled or
+      // returned, oldest first so the longest-waiting customer surfaces first.
+      S.listItem()
+        .title('Orders')
+        .icon(BasketIcon)
+        .child(
+          S.list()
+            .title('Orders')
+            .items([
+              S.listItem()
+                .title('To fulfil')
+                .icon(ClockIcon)
+                .child(
+                  S.documentList()
+                    .title('To fulfil')
+                    .schemaType('order')
+                    .filter('_type == "order" && !(status in ["delivered", "cancelled", "returned"])')
+                    .defaultOrdering([{ field: 'placedAt', direction: 'asc' }])
+                ),
+              S.listItem()
+                .title('Shipped')
+                .icon(RocketIcon)
+                .child(
+                  S.documentList()
+                    .title('Shipped')
+                    .schemaType('order')
+                    .filter('_type == "order" && status == "shipped"')
+                    .defaultOrdering([{ field: 'placedAt', direction: 'desc' }])
+                ),
+              S.listItem()
+                .title('Delivered')
+                .icon(CheckmarkCircleIcon)
+                .child(
+                  S.documentList()
+                    .title('Delivered')
+                    .schemaType('order')
+                    .filter('_type == "order" && status == "delivered"')
+                    .defaultOrdering([{ field: 'placedAt', direction: 'desc' }])
+                ),
+              S.divider(),
+              S.listItem()
+                .title('All orders')
+                .icon(ArchiveIcon)
+                .child(
+                  S.documentTypeList('order')
+                    .title('All orders')
+                    .defaultOrdering([{ field: 'placedAt', direction: 'desc' }])
+                ),
+            ])
+        ),
+
+      // Vouchers — issued once per confirmed subscriber, consumed once at
+      // checkout. Read-only in practice; the useful views are "who has an
+      // unspent code" and "which order burnt which code".
+      S.listItem()
+        .title('Vouchers')
+        .icon(TagIcon)
+        .child(
+          S.list()
+            .title('Vouchers')
+            .items([
+              S.listItem()
+                .title('Unused')
+                .icon(ClockIcon)
+                .child(
+                  S.documentList()
+                    .title('Unused')
+                    .schemaType('voucher')
+                    .filter('_type == "voucher" && status == "issued"')
+                    .defaultOrdering([{ field: 'issuedAt', direction: 'desc' }])
+                ),
+              S.listItem()
+                .title('Redeemed')
+                .icon(CheckmarkCircleIcon)
+                .child(
+                  S.documentList()
+                    .title('Redeemed')
+                    .schemaType('voucher')
+                    .filter('_type == "voucher" && status == "redeemed"')
+                    .defaultOrdering([{ field: 'redeemedAt', direction: 'desc' }])
+                ),
+              S.divider(),
+              S.listItem()
+                .title('All vouchers')
+                .child(S.documentTypeList('voucher').title('All vouchers')),
+            ])
+        ),
 
       S.divider(),
 
@@ -78,6 +180,6 @@ export const structure = (S, context) =>
       // Anything else registered in the schema that isn't handled above
       // (defensive — keeps new document types from disappearing silently).
       ...S.documentTypeListItems().filter(
-        (item) => !['siteSettings', 'product', 'category', 'colour', 'review'].includes(item.getId())
+        (item) => !['siteSettings', 'product', 'category', 'colour', 'review', 'order', 'voucher'].includes(item.getId())
       ),
     ]);

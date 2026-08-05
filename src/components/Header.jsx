@@ -18,7 +18,7 @@ export function Header() {
           Cash on Delivery available across Pakistan
         </div>
         <div style={{ display: 'flex', gap: 24 }}>
-          <span>Free shipping over Rs. 5,000</span>
+          <span>Free shipping nationwide</span>
           <Link to="/track-order">Track order</Link>
           <span>EN / <span className="urdu" lang="ur">اردو</span></span>
         </div>

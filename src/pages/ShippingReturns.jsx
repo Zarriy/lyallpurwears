@@ -1,25 +1,26 @@
 // Shipping & Returns — the footer pointed this at /contact, which only ever
-// answered half of it in an FAQ accordion. Figures here are the same ones the
-// cart and PDP enforce: free over Rs. 5,000, flat Rs. 299 below it (see
-// src/pages/Cart.jsx SHIPPING_FLAT and CartContext's freeShippingThreshold).
-// If those change, change them here too.
+// answered half of it in an FAQ accordion.
+//
+// Delivery is FREE on every order, nationwide, with no minimum. It used to be
+// a flat Rs. 299 below a Rs. 5,000 threshold; the authoritative figure now
+// lives in netlify/functions/_pricing.js (FLAT_SHIPPING). If that ever goes
+// back above zero, this page and the cart have to say so again.
 import { Link } from 'react-router-dom';
 import { Reveal, PageHero, Accordion, TrustStrip } from '../components/primitives.jsx';
 import { useStore } from '../sanity/useStore.js';
 import { formatPrice } from '../data/products.js';
 
 const DEFAULT_PHONE = '+92 300 1234567';
-const SHIPPING_FLAT = 299;
 
 function waLink(phone) {
   const digits = String(phone || '').replace(/\D/g, '');
   return digits ? `https://wa.me/${digits}` : null;
 }
 
-function DeliveryTable({ threshold }) {
+function DeliveryTable() {
   const rows = [
-    ['Standard — nationwide', '2–4 working days', `${formatPrice(SHIPPING_FLAT)} · free over ${formatPrice(threshold)}`],
-    ['Stitched to measure', '5–9 working days', 'Stitching charged per piece at checkout'],
+    ['Standard — nationwide', '2–4 working days', 'Free · no minimum'],
+    ['With stitching added', '5–9 working days', 'Optional add-on · charged per piece'],
     ['Cash on Delivery', '2–4 working days', 'No extra charge'],
     ['Remote / rural postcodes', '4–7 working days', 'Standard rate applies'],
   ];
@@ -157,11 +158,11 @@ function HowTo({ phone }) {
   );
 }
 
-function Details({ threshold }) {
+function Details() {
   const items = [
     { title: 'Do you ship outside Pakistan?', body: 'Not yet. Everything currently ships within Pakistan only. We are working on rates for the Gulf and the UK — join the letter at the bottom of any page and we will tell you when it opens.' },
     { title: 'Can I pay cash on delivery?', body: 'Yes, anywhere in Pakistan, at no extra charge. The courier collects the full amount at your door. For orders above Rs. 25,000 we may ask for a partial advance before dispatch.' },
-    { title: `Why is shipping free over ${formatPrice(threshold)}?`, body: `Below that figure the courier charge is a real cost we would otherwise bury in the product price, so we show it: a flat ${formatPrice(SHIPPING_FLAT)}. Above it, the order is large enough to absorb the charge and we stop passing it on.` },
+    { title: 'Is delivery really free?', body: 'Yes, on every order, anywhere in Pakistan, with no minimum spend. The courier charge is real and we carry it rather than adding it at the last screen — the price on the product page is the price you pay.' },
     { title: 'My parcel is late — what now?', body: 'Check the tracking link in your dispatch message first; couriers scan irregularly on rural routes. If it has not moved in 48 hours, message us with the order number and we will chase it from our end rather than asking you to.' },
     { title: 'Something arrived damaged.', body: 'Photograph it before you unfold anything further and send us the pictures the same day. Damage in transit is our problem, not yours — we replace or refund, and we arrange collection at our own cost.' },
     { title: 'Can I exchange for another size or colour?', body: 'Yes, within the same 7-day window and subject to stock. Because we buy in short runs a colourway may already be gone, in which case we refund instead. Exchanges ship free.' },
@@ -189,7 +190,6 @@ function Details({ threshold }) {
 export default function ShippingReturns() {
   const { settings } = useStore();
   const phone = settings?.contactPhone || DEFAULT_PHONE;
-  const threshold = settings?.freeShippingThreshold ?? 5000;
 
   return (
     <div>
@@ -199,10 +199,10 @@ export default function ShippingReturns() {
         accent="posted today."
         lede="What it costs, how long it takes, and exactly what happens if you want to send something back."
       />
-      <DeliveryTable threshold={threshold} />
+      <DeliveryTable />
       <Returns />
       <HowTo phone={phone} />
-      <Details threshold={threshold} />
+      <Details />
       <TrustStrip />
     </div>
   );

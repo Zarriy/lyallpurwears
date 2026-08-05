@@ -1,0 +1,110 @@
+<!-- Lyallpur Wear — Brevo double opt-in confirmation email (template #3).
+     Pasted into Brevo: Templates -> #3 -> Edit -> HTML custom code.
+
+     REQUIRED, do not remove:
+       - the confirm link's href must be {{ doubleoptin }} (Brevo's tag)
+       - the template needs the literal tag "optin" in Brevo's Advanced
+         Settings, or the API rejects it with "An active DOI template does
+         not exist"
+
+     RESTRAINED ON PURPOSE. This sits between the two extremes we tried: the
+     first version was a full marketing email (gold panels, voucher block,
+     benefits table, unsubscribe footer), the second was unstyled plain text.
+     Gmail sorts on content shape, and every block, coloured panel, image and
+     extra link pushes toward Promotions — where a confirmation nobody sees
+     is a confirmation nobody clicks. So the branding here is the cheapest
+     kind: the wordmark, one hairline rule, the gold accent on a single
+     button, and the serif. No images, no panels, no benefits grid, no
+     unsubscribe, and exactly one link in the body.
+
+     The rich brand moment belongs on /welcome, where the click lands.
+
+     THE CODE IS NOT IN THIS EMAIL, on purpose. Handing over the voucher
+     before the click leaves nothing to confirm for. The email promises it;
+     /welcome verifies membership and pays it out. -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0;padding:0;background-color:#FFFFFF;">
+  <tr>
+    <td align="center" style="padding:32px 20px;">
+
+      <table role="presentation" width="520" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:520px;">
+
+        <!-- Wordmark -->
+        <tr>
+          <td align="center" style="padding-bottom:10px;font-family:Georgia,'Times New Roman',serif;font-size:22px;letter-spacing:0.16em;color:#0A0A0A;">
+            LYALLPUR
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding-bottom:26px;font-family:Georgia,'Times New Roman',serif;font-size:9px;letter-spacing:0.44em;color:#B8924A;">
+            W E A R
+          </td>
+        </tr>
+        <tr>
+          <td style="padding-bottom:30px;">
+            <div style="height:1px;background-color:#E4E4E0;font-size:0;line-height:0;">&nbsp;</div>
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.75;color:#1A1A1A;">
+            <p style="margin:0 0 18px 0;">Hello,</p>
+
+            <p style="margin:0 0 18px 0;">
+              You asked us to send you our letter. Please confirm this address so we know
+              it's really yours.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Single call to action. A table cell carries the fill so Outlook
+             still paints the block behind the link. -->
+        <tr>
+          <td align="center" style="padding:14px 0 26px 0;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td align="center" bgcolor="#B8924A" style="background-color:#B8924A;">
+                  <a href="{{ doubleoptin }}" target="_blank" style="display:inline-block;padding:15px 34px;font-family:Georgia,'Times New Roman',serif;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;color:#FFFFFF;text-decoration:none;">
+                    Confirm my email
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.75;color:#1A1A1A;">
+            <p style="margin:0 0 18px 0;">
+              As soon as you do, we'll show you your Rs. 500 code — it comes off your first
+              order over Rs. 3,000, and it's good for 30 days.
+            </p>
+
+            <p style="margin:0 0 18px 0;">
+              After that you'll hear from us when a new lot lands in Lyallpur, and when we
+              quietly reduce something. Not often, and never more than we'd want in our own inbox.
+            </p>
+
+            <p style="margin:0 0 18px 0;">
+              One thing worth knowing before you order: we sell cloth. Everything ships
+              unstitched — measured lengths for your own tailor, not a finished garment.
+              Stitching is something you can add if you'd rather we did it.
+            </p>
+
+            <p style="margin:0 0 4px 0;">Thank you,</p>
+            <p style="margin:0 0 28px 0;font-style:italic;color:#6B6B6B;">Lyallpur Wear &mdash; Faisalabad</p>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding-top:20px;border-top:1px solid #E4E4E0;font-family:Georgia,'Times New Roman',serif;font-size:12px;line-height:1.7;color:#6B6B6B;">
+            If you didn't sign up at lyallpurwear.com, you can ignore this message &mdash;
+            we won't email you again unless you confirm.
+          </td>
+        </tr>
+
+      </table>
+
+    </td>
+  </tr>
+</table>
