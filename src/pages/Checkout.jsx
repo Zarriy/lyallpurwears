@@ -743,4 +743,9 @@ const CHK_CSS = `
   .chk-left form, .chk-left > * { margin: 0 auto; }
   .chk-thanks-body { grid-template-columns: 1fr; }
 }
+@media (max-width: 640px) {
+  /* iOS Safari zooms the page when focusing an input under 16px — keep the
+     checkout fields at 16px so filling the form never jolts the viewport. */
+  .chk-input, .chk-select-wrap select { font-size: 16px; }
+}
 `;

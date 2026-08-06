@@ -588,7 +588,7 @@ function ReviewForm({ productSlug }) {
         style={{ position: 'absolute', left: -9999, width: 1, height: 1, opacity: 0 }}
       />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div className="pdp-form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <input
           className="field-underline"
           placeholder="Your name"
@@ -989,7 +989,7 @@ export default function Product() {
             <div className="kicker kicker-gold" style={{ marginBottom: 12 }}>
               {editionLabel} · {product.fabric}
             </div>
-            <h1 className="serif-display" style={{ fontSize: 64, marginBottom: 12 }}>
+            <h1 className="serif-display" style={{ fontSize: 'clamp(40px, 8vw, 64px)', marginBottom: 12 }}>
               {product.name}
               {product.urdu && (
                 <span className="urdu" lang="ur" style={{ color: 'var(--gold)' }}>
@@ -1073,16 +1073,15 @@ export default function Product() {
       <YouMayLike product={product} />
       <TrustStrip />
 
+      {/* The .pdp-grid / .pdp-info breakpoint lives in global.css — the
+          loading skeleton renders the same grid before this block mounts. */}
       <style>{`
-        @media (max-width: 960px) {
-          /* Below this the 50/50 split starves the buy column, so stack:
-             full-width gallery, info underneath and no longer sticky. */
-          .pdp-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
-          .pdp-info { position: static !important; }
-        }
         @media (max-width: 720px) {
           .pdp-reviews-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
-          .pdp-related-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .pdp-related-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 16px !important; }
+        }
+        @media (max-width: 560px) {
+          .pdp-form-row { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </div>

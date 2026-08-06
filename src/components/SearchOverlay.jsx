@@ -222,6 +222,7 @@ export function SearchOverlay({ open, onClose }) {
                                   ratio="3/4"
                                   seed={p.name}
                                   label={p.name.toUpperCase()}
+                                  sizes="42px"
                                 />
                               </span>
                               <span style={{ minWidth: 0 }}>

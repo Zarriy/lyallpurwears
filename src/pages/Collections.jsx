@@ -209,6 +209,9 @@ export default function Collections() {
               style={{
                 width: '100%',
                 aspectRatio: '21/9',
+                // At phone widths a 21:9 band is ~150px tall and the quote
+                // overflows it — hold a floor and let the crop deepen instead.
+                minHeight: 300,
                 objectFit: 'cover',
                 objectPosition: 'center 45%',
                 display: 'block',

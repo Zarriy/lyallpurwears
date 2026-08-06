@@ -204,7 +204,7 @@ export function TrustStrip() {
     ? settings.trustStripItems.map((i) => ({ t: i.title, s: i.subtitle }))
     : DEFAULT_TRUST_ITEMS;
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
+    <div className="trust-strip" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)' }}>
       {items.map((it, i) => (
         <div key={i} style={{ padding: '28px 24px', borderRight: i < items.length - 1 ? '1px solid var(--line)' : 'none', textAlign: 'center' }}>
           <div className="kicker kicker-gold" style={{ marginBottom: 8 }}>{it.t}</div>

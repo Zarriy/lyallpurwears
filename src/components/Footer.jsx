@@ -141,7 +141,7 @@ export function Footer() {
   ];
   return (
     <footer className="footer">
-      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr 1fr 1.2fr', gap: 48, paddingBottom: 64, borderBottom: '1px solid var(--line-on-ink)' }}>
+      <div className="footer-grid">
         <div>
           <div style={{ marginBottom: 24 }}>
             <LogoStacked width={170} color="var(--paper)" accent="var(--gold-soft)" />
@@ -171,7 +171,7 @@ export function Footer() {
         ))}
         <LetterSignup />
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 24, fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(250,250,247,0.5)' }}>
+      <div className="footer-bottom">
         <span>© 2026 Lyallpur Wear · Faisalabad (Lyallpur), Pakistan</span>
         <span style={{ display: 'flex', gap: 24 }}>
           <Link to="/privacy">Privacy</Link>

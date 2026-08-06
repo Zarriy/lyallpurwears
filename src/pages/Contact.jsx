@@ -93,7 +93,7 @@ function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+      <div className="contact-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
         <input
           className="field-underline"
           placeholder="Full name"
@@ -110,7 +110,7 @@ function ContactForm() {
           required
         />
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+      <div className="contact-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
         <input
           className="field-underline"
           placeholder="WhatsApp number"
@@ -265,7 +265,7 @@ function ContactCards() {
 function ContactSplit() {
   return (
     <section style={{ padding: 'var(--section-pad) var(--gutter)' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: 96, alignItems: 'flex-start' }}>
+      <div className="contact-grid" style={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: 96, alignItems: 'flex-start' }}>
         <Reveal>
           <ContactForm />
         </Reveal>
@@ -321,6 +321,15 @@ export default function Contact() {
       <ContactSplit />
       <FAQ />
       <TrustStrip />
+
+      <style>{`
+        @media (max-width: 900px) {
+          .contact-grid { grid-template-columns: 1fr !important; gap: 56px !important; }
+        }
+        @media (max-width: 560px) {
+          .contact-row { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </div>
   );
 }

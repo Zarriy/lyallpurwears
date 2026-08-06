@@ -157,11 +157,21 @@ const CSS = `
 @media (max-width: 640px) {
   .nf {
     --nf-frame: 14px;
-    --nf-pad: 36px;
+    --nf-pad: 28px;
   }
   .nf-strip {
     font-size: 8.5px;
     letter-spacing: 0.14em;
+    /* nowrap clips the right-hand span inside .nf's overflow:hidden at
+       320px — let the strip stack instead. */
+    white-space: normal;
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+    gap: 4px 12px;
+  }
+  .nf-title {
+    font-size: clamp(44px, 13vw, 160px);
   }
   .nf-contacts {
     flex-direction: column;

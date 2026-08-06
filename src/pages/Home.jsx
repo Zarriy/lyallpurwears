@@ -70,6 +70,7 @@ function Hero({ products }) {
       {/* Background photography w/ ken-burns */}
       <div className="kenburns" style={{ position: 'absolute', inset: 0 }}>
         <img
+          className="hero-img"
           src={IMAGES.hero}
           alt="Model in hand block-printed lawn"
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'right center' }}
@@ -97,14 +98,14 @@ function Hero({ products }) {
 
       {/* Main copy */}
       <div style={{
-        position: 'absolute', bottom: 96, left: 'var(--gutter)', zIndex: 3,
+        position: 'absolute', bottom: 96, left: 'var(--gutter)', right: 'var(--gutter)', zIndex: 3,
         color: 'var(--paper)', maxWidth: 720,
         transform: `translateY(${scrollY * -0.25}px)`,
       }}>
         <div className="kicker" style={{ color: 'var(--gold-soft)', marginBottom: 24 }}>
           New Arrival · Lawn '26
         </div>
-        <h1 className="serif-display" style={{ fontSize: 'clamp(60px, 9vw, 132px)', marginBottom: 20 }}>
+        <h1 className="serif-display" style={{ fontSize: 'clamp(44px, 9vw, 132px)', marginBottom: 20 }}>
           The Mehfil<br />
           <em style={{ color: 'var(--gold-soft)', fontWeight: 300 }}>Edit.</em>
         </h1>
@@ -122,8 +123,9 @@ function Hero({ products }) {
         </div>
       </div>
 
-      {/* Right meta column */}
-      <Link to={`/product/${hero.slug}`} style={{
+      {/* Right meta column — hidden below 960px, where it would land on top
+          of the main copy (both sit at bottom: 96). */}
+      <Link to={`/product/${hero.slug}`} className="hero-meta" style={{
         position: 'absolute', right: 'var(--gutter)', bottom: 96, zIndex: 3,
         color: 'var(--paper)', textAlign: 'right',
         transform: `translateY(${scrollY * -0.18}px)`,
@@ -235,7 +237,7 @@ function CollectionsSlider() {
 function FeaturedProduct() {
   return (
     <section style={{ background: 'var(--ink)', color: 'var(--paper)', padding: 'var(--section-pad) var(--gutter)' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 'clamp(40px, 6vw, 96px)', alignItems: 'center' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))', gap: 'clamp(40px, 6vw, 96px)', alignItems: 'center' }}>
         <Reveal>
           <div style={{ aspectRatio: '4/5', overflow: 'hidden' }}>
             <Photo src={IMAGES.story} alt="The looms of Lyallpur — editorial" ratio="4/5" />
@@ -254,7 +256,7 @@ function FeaturedProduct() {
           <p style={{ fontFamily: 'var(--serif)', fontSize: 20, lineHeight: 1.6, color: 'rgba(250,250,247,0.78)', marginBottom: 32, maxWidth: 480 }}>
             The Mehfil edit was pulled bolt by bolt out of the cloth bazaars of Lyallpur — Faisalabad, the city of looms — and off the print tables of Multan. We don't own the looms. We just refuse to bring back anything we wouldn't wear ourselves.
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32, marginBottom: 40, paddingTop: 32, borderTop: '1px solid rgba(250,250,247,0.12)' }}>
+          <div className="home-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32, marginBottom: 40, paddingTop: 32, borderTop: '1px solid rgba(250,250,247,0.12)' }}>
             <div>
               <div className="figure-stat" style={{ color: 'var(--gold-soft)' }}>40+</div>
               <div className="kicker" style={{ marginTop: 8 }}>Mills Visited</div>
@@ -361,7 +363,7 @@ function Lookbook() {
           </h2>
         </div>
       </Reveal>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
+      <div className="lookbook-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
         <Reveal style={{ gridColumn: 'span 5', gridRow: 'span 2' }}>
           <Photo src={IMAGES.lookbook[0]} alt="Lookbook — Ghanta Ghar" ratio="3/4" />
         </Reveal>
@@ -438,7 +440,7 @@ function ReviewsBlock() {
         </div>
       </Reveal>
       <Reveal stagger>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: 24 }}>
           {reviews.map((r, i) => (
             <div key={i} style={{ background: 'var(--paper)', padding: 32, border: '1px solid var(--line)' }}>
               <div style={{ display: 'flex', gap: 4, marginBottom: 16 }}>
@@ -512,7 +514,7 @@ function Newsletter() {
 
   return (
     <section style={{ background: 'var(--ink)', color: 'var(--paper)', padding: 'var(--section-pad) var(--gutter)', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 'clamp(40px, 6vw, 96px)', alignItems: 'center', position: 'relative', zIndex: 2 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 100%), 1fr))', gap: 'clamp(40px, 6vw, 96px)', alignItems: 'center', position: 'relative', zIndex: 2 }}>
         <Reveal>
           <div className="kicker" style={{ color: 'var(--gold-soft)', marginBottom: 24 }}>Become a Patron</div>
           <h2 className="serif-display" style={{ fontSize: 'clamp(44px, 6vw, 88px)', color: 'var(--paper)', marginBottom: 24 }}>
@@ -526,7 +528,7 @@ function Newsletter() {
         <Reveal>
           <form
             onSubmit={onSubmit}
-            style={{ background: 'rgba(250,250,247,0.04)', padding: 40, border: '1px solid rgba(184,146,74,0.3)' }}
+            style={{ background: 'rgba(250,250,247,0.04)', padding: 'clamp(24px, 5vw, 40px)', border: '1px solid rgba(184,146,74,0.3)' }}
           >
             <div className="kicker" style={{ color: 'var(--gold-soft)', marginBottom: 24 }}>Sign up · No spam</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -590,6 +592,30 @@ export default function Home() {
       <ReviewsBlock />
       <TrustStrip />
       <Newsletter />
+
+      <style>{`
+        @media (max-width: 960px) {
+          /* Sits at the same bottom offset as the main hero copy — on one
+             column of glass there isn't room for both. */
+          .hero-meta { display: none !important; }
+        }
+        @media (max-width: 640px) {
+          /* The desktop crop anchors the model at the right edge, where the
+             copy doesn't sit — on one phone-width column that slice is mostly
+             garden. 70%, not 50%: the model stands right of the photo's
+             centre, so a true centre crop still cuts her at the frame edge. */
+          .hero-img { object-position: 70% center !important; }
+          /* Three 48px+ figures don't fit three-up on a phone — keep the row
+             but let the numerals come down to meet it. */
+          .home-stats { gap: 16px !important; }
+          .home-stats .figure-stat { font-size: 32px; }
+          /* The 12-column collage's span-5/span-4 tiles shrink to thumbnails
+             on a phone. Re-cut it: lead image full width, the rest two-up. */
+          .lookbook-grid { grid-template-columns: 1fr 1fr !important; }
+          .lookbook-grid > * { grid-column: auto !important; grid-row: auto !important; }
+          .lookbook-grid > *:first-child { grid-column: 1 / -1 !important; }
+        }
+      `}</style>
     </>
   );
 }
