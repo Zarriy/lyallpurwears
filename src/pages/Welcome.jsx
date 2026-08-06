@@ -171,21 +171,15 @@ export default function Welcome() {
   }, []);
 
   // The confirmation click resolves without the visitor typing anything.
+  // (The robots noindex tag this effect used to plant is now owned by
+  // src/seo/RouteMeta.jsx — /welcome is marked noindex in src/seo/meta.js,
+  // and the edge function serves the same tag to crawlers.)
   useEffect(() => {
     const fromUrl = credentialsFromLocation();
     if (fromUrl) {
       if (fromUrl.email) setEmail(fromUrl.email);
       lookup(fromUrl);
     }
-    // A page that exists to display a discount code has no business in search
-    // results — indexed voucher pages end up scraped onto coupon aggregators.
-    const meta = document.createElement('meta');
-    meta.name = 'robots';
-    meta.content = 'noindex, nofollow';
-    document.head.appendChild(meta);
-    return () => {
-      document.head.removeChild(meta);
-    };
   }, [lookup]);
 
   const onSubmit = (e) => {

@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { StoreProvider } from './sanity/useStore.js';
 import { CartProvider } from './context/CartContext.jsx';
+import { RouteMeta } from './seo/RouteMeta.jsx';
 import { Header } from './components/Header.jsx';
 import { Footer } from './components/Footer.jsx';
 import { CartDrawer } from './components/CartDrawer.jsx';
@@ -107,6 +108,7 @@ function StorefrontShell() {
     <StoreProvider>
       <CartProvider>
         <div className="frame">
+          <RouteMeta />
           {!bare && <Header />}
           <main>
             <ScrollToTop />
